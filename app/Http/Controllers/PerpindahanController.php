@@ -15,13 +15,13 @@ class PerpindahanController extends Controller
 
         if ($request->has('search')) {
             $search = $request->search;
-            $query->where(function($q) use ($search) {
+            $query->where(function ($q) use ($search) {
                 $q->where('asal', 'like', "%{$search}%")
-                  ->orWhere('tujuan', 'like', "%{$search}%")
-                  ->orWhere('diusulkan_oleh', 'like', "%{$search}%")
-                  ->orWhereHas('warga', function($qw) use ($search) {
-                      $qw->where('nama_lengkap', 'like', "%{$search}%");
-                  });
+                    ->orWhere('tujuan', 'like', "%{$search}%")
+                    ->orWhere('diusulkan_oleh', 'like', "%{$search}%")
+                    ->orWhereHas('warga', function ($qw) use ($search) {
+                        $qw->where('nama_lengkap', 'like', "%{$search}%");
+                    });
             });
         }
 
@@ -30,12 +30,14 @@ class PerpindahanController extends Controller
         }
 
         $perpindahans = $query->orderBy('created_at', 'desc')->paginate(10);
+
         return view('perpindahan.index', compact('perpindahans'));
     }
 
     public function create()
     {
         $wargas = Warga::orderBy('nama_lengkap')->get();
+
         return view('perpindahan.create', compact('wargas'));
     }
 
@@ -58,6 +60,7 @@ class PerpindahanController extends Controller
     public function edit(Perpindahan $perpindahan)
     {
         $wargas = Warga::orderBy('nama_lengkap')->get();
+
         return view('perpindahan.edit', compact('perpindahan', 'wargas'));
     }
 
@@ -81,7 +84,7 @@ class PerpindahanController extends Controller
     {
         $perpindahan->update([
             'status' => 'disetujui',
-            'tindak_lanjut' => 'Disetujui oleh admin pada ' . now()->format('d/m/Y H:i'),
+            'tindak_lanjut' => 'Disetujui oleh admin pada '.now()->format('d/m/Y H:i'),
         ]);
 
         return redirect()->route('perpindahan.index')->with('success', 'Pengajuan perpindahan disetujui.');
@@ -91,7 +94,7 @@ class PerpindahanController extends Controller
     {
         $perpindahan->update([
             'status' => 'ditolak',
-            'tindak_lanjut' => 'Ditolak oleh admin pada ' . now()->format('d/m/Y H:i'),
+            'tindak_lanjut' => 'Ditolak oleh admin pada '.now()->format('d/m/Y H:i'),
         ]);
 
         return redirect()->route('perpindahan.index')->with('error', 'Pengajuan perpindahan ditolak.');
@@ -100,6 +103,7 @@ class PerpindahanController extends Controller
     public function destroy(Perpindahan $perpindahan)
     {
         $perpindahan->delete();
+
         return redirect()->route('perpindahan.index')->with('success', 'Data perpindahan berhasil dihapus.');
     }
 }

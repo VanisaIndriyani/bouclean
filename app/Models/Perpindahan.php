@@ -34,7 +34,7 @@ class Perpindahan extends Model
 
     public function getStatusBadgeAttribute()
     {
-        return match($this->status) {
+        return match ($this->status) {
             'pending' => '<span class="badge bg-warning text-dark">Pending</span>',
             'disetujui' => '<span class="badge bg-success">Disetujui</span>',
             'ditolak' => '<span class="badge bg-danger">Ditolak</span>',

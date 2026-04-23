@@ -2,10 +2,12 @@
 
 namespace Database\Factories;
 
+use App\Models\Perpindahan;
+use App\Models\Warga;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Perpindahan>
+ * @extends Factory<Perpindahan>
  */
 class PerpindahanFactory extends Factory
 {
@@ -17,7 +19,7 @@ class PerpindahanFactory extends Factory
     public function definition(): array
     {
         return [
-            'warga_id' => \App\Models\Warga::factory(),
+            'warga_id' => Warga::factory(),
             'user_id' => 1,
             'asal' => $this->faker->address,
             'tujuan' => $this->faker->address,

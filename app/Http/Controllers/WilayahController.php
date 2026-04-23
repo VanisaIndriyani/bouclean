@@ -13,17 +13,18 @@ class WilayahController extends Controller
 
         if ($request->has('search')) {
             $search = $request->search;
-            $query->where(function($q) use ($search) {
+            $query->where(function ($q) use ($search) {
                 $q->where('kecamatan', 'like', "%{$search}%")
-                  ->orWhere('kelurahan', 'like', "%{$search}%")
-                  ->orWhere('rt', 'like', "%{$search}%")
-                  ->orWhere('rw', 'like', "%{$search}%")
-                  ->orWhere('dasawisma', 'like', "%{$search}%")
-                  ->orWhere('nama_pengguna', 'like', "%{$search}%");
+                    ->orWhere('kelurahan', 'like', "%{$search}%")
+                    ->orWhere('rt', 'like', "%{$search}%")
+                    ->orWhere('rw', 'like', "%{$search}%")
+                    ->orWhere('dasawisma', 'like', "%{$search}%")
+                    ->orWhere('nama_pengguna', 'like', "%{$search}%");
             });
         }
 
         $wilayahs = $query->orderBy('kecamatan')->orderBy('kelurahan')->paginate(10);
+
         return view('wilayah.index', compact('wilayahs'));
     }
 
@@ -72,6 +73,7 @@ class WilayahController extends Controller
     public function destroy(Wilayah $wilayah)
     {
         $wilayah->delete();
+
         return redirect()->route('wilayah.index')->with('success', 'Data wilayah berhasil dihapus.');
     }
 }

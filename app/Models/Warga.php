@@ -24,11 +24,47 @@ class Warga extends Model
         'rt',
         'rw',
         'dasawisma',
+        'status_dalam_keluarga',
+        'no_kk',
+        'no_register_pkk',
+        'agama',
+        'status_perkawinan',
+        'alamat',
+        'pendidikan',
+        'pekerjaan',
+        'status_tinggal',
+        'merantau_ke',
+        'perantau_dari',
+        'akseptor_kb',
+        'aktif_posyandu',
+        'bina_keluarga_balita',
+        'memiliki_tabungan',
+        'mengikuti_kelompok_belajar',
+        'jenis_kelompok_belajar',
+        'ikut_kegiatan_operasional',
+        'jenis_operasi',
+        'mengikuti_paud',
+        'berkebutuhan_khusus',
+        'buta',
+        'hamil',
+        'menyusui',
+        'status',
         'user_id',
     ];
 
     protected $casts = [
         'tanggal_lahir' => 'date',
+        'akseptor_kb' => 'boolean',
+        'aktif_posyandu' => 'boolean',
+        'bina_keluarga_balita' => 'boolean',
+        'memiliki_tabungan' => 'boolean',
+        'mengikuti_kelompok_belajar' => 'boolean',
+        'ikut_kegiatan_operasional' => 'boolean',
+        'mengikuti_paud' => 'boolean',
+        'berkebutuhan_khusus' => 'boolean',
+        'buta' => 'boolean',
+        'hamil' => 'boolean',
+        'menyusui' => 'boolean',
     ];
 
     public function user(): BelongsTo
@@ -44,6 +80,11 @@ class Warga extends Model
     public function pilahSampahs(): HasMany
     {
         return $this->hasMany(PilahSampah::class);
+    }
+
+    public function kesehatanWargas(): HasMany
+    {
+        return $this->hasMany(KesehatanWarga::class);
     }
 
     public function iuranSampahs(): HasMany

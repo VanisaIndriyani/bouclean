@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Pilah Sampah - Bouclean')
+@section('title', 'Pilah Sampah - Bouclear')
 
 @section('content')
 <div class="page-header d-flex justify-content-between align-items-center">
@@ -22,12 +22,12 @@
                         <span class="input-group-text bg-white">
                             <i class="bi bi-search text-muted"></i>
                         </span>
-                        <input type="text" class="form-control" name="search" placeholder="Cari nama warga..." value="{{ request('search') }}">
+                        <input type="text" class="form-control" name="search" placeholder="Cari nama, NIK, atau wilayah..." value="{{ request('search') }}">
                     </div>
                 </div>
                 <div class="col-md-4">
                     <button type="submit" class="btn btn-secondary rounded-pill w-100">
-                        <i class="bi bi-funnel me-2"></i> Filter
+                        <i class="bi bi-search me-2"></i> Cari
                     </button>
                 </div>
             </div>
@@ -38,9 +38,15 @@
                 <thead>
                     <tr>
                         <th width="50">No</th>
-                        <th>Warga</th>
-                        <th>JK</th>
-                        <th>Berat (gram)</th>
+                        <th>Kecamatan</th>
+                        <th>Kelurahan</th>
+                        <th>RW</th>
+                        <th>RT</th>
+                        <th>Dasawisma</th>
+                        <th>Kepala Keluarga</th>
+                        <th>Jenis Kelamin</th>
+                        <th>Jenis Sampah</th>
+                        <th>Berat (gr)</th>
                         <th>Sedekah</th>
                         <th>Harga</th>
                         <th>Foto</th>
@@ -51,6 +57,11 @@
                     @forelse($pilahSampahs as $index => $pilah)
                     <tr>
                         <td class="text-center">{{ $pilahSampahs->firstItem() + $index }}</td>
+                        <td>{{ $pilah->kecamatan ?? $pilah->warga->kecamatan }}</td>
+                        <td>{{ $pilah->kelurahan ?? $pilah->warga->kelurahan }}</td>
+                        <td>{{ $pilah->rw ?? $pilah->warga->rw }}</td>
+                        <td>{{ $pilah->rt ?? $pilah->warga->rt }}</td>
+                        <td>{{ $pilah->dasawisma ?? $pilah->warga->dasawisma }}</td>
                         <td>
                             <strong>{{ $pilah->warga->nama_lengkap }}</strong><br>
                             <small class="text-muted">{{ $pilah->warga->nik }}</small>
@@ -62,6 +73,7 @@
                                 <span class="badge bg-danger">P</span>
                             @endif
                         </td>
+                        <td>{{ $pilah->jenis_sampah ?? '-' }}</td>
                         <td>{{ number_format($pilah->berat, 0, ',', '.') }} g</td>
                         <td>
                             @if($pilah->sedekah)
@@ -73,7 +85,9 @@
                         <td>Rp {{ number_format($pilah->harga, 0, ',', '.') }}</td>
                         <td>
                             @if($pilah->foto_url)
-                                <img src="{{ $pilah->foto_url }}" alt="Foto" class="img-thumbnail" style="max-width: 60px;">
+                                <a href="{{ $pilah->foto_url }}" target="_blank" class="btn btn-sm btn-outline-primary rounded-pill">
+                                    <i class="bi bi-image me-1"></i> Lihat Foto
+                                </a>
                             @else
                                 <span class="text-muted">-</span>
                             @endif
@@ -97,7 +111,7 @@
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="8" class="text-center py-4">
+                        <td colspan="14" class="text-center py-4">
                             <div class="text-muted">
                                 <i class="bi bi-inbox fs-1 d-block mb-2"></i>
                                 <strong>Belum ada data pilah sampah</strong>

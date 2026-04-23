@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Tambah Pilah Sampah - Bouclean')
+@section('title', 'Tambah Pilah Sampah - Bouclear')
 
 @section('content')
 <div class="page-header d-flex justify-content-between align-items-center">
@@ -21,10 +21,17 @@
             <div class="row g-4">
                 <div class="col-md-6">
                     <label class="form-label">Warga <span class="text-danger">*</span></label>
-                    <select class="form-select @error('warga_id') is-invalid @enderror" name="warga_id" required>
+                    <select class="form-select @error('warga_id') is-invalid @enderror" name="warga_id" id="wargaSelect" required>
                         <option value="">-- Pilih Warga --</option>
                         @foreach($wargas as $warga)
-                            <option value="{{ $warga->id }}" {{ old('warga_id') == $warga->id ? 'selected' : '' }}>
+                            <option value="{{ $warga->id }}"
+                                data-kecamatan="{{ $warga->kecamatan }}"
+                                data-kelurahan="{{ $warga->kelurahan }}"
+                                data-rt="{{ $warga->rt }}"
+                                data-rw="{{ $warga->rw }}"
+                                data-dasawisma="{{ $warga->dasawisma }}"
+                                data-jk="{{ $warga->jenis_kelamin }}"
+                                {{ old('warga_id') == $warga->id ? 'selected' : '' }}>
                                 {{ $warga->nama_lengkap }} - {{ $warga->nik }}
                             </option>
                         @endforeach
@@ -36,12 +43,70 @@
 
                 <div class="col-md-6">
                     <label class="form-label">Jenis Kelamin <span class="text-danger">*</span></label>
-                    <select class="form-select @error('jenis_kelamin') is-invalid @enderror" name="jenis_kelamin" required>
+                    <select class="form-select @error('jenis_kelamin') is-invalid @enderror" name="jenis_kelamin" id="jkSelect" required>
                         <option value="">-- Pilih --</option>
                         <option value="Laki-laki" {{ old('jenis_kelamin') == 'Laki-laki' ? 'selected' : '' }}>Laki-laki</option>
                         <option value="Perempuan" {{ old('jenis_kelamin') == 'Perempuan' ? 'selected' : '' }}>Perempuan</option>
                     </select>
                     @error('jenis_kelamin')
+                        <div class="invalid-feedback">{{ $message }}</div>
+                    @enderror
+                </div>
+
+                <div class="col-12">
+                    <hr>
+                    <h6 class="mb-3"><i class="bi bi-map me-2"></i>Wilayah</h6>
+                </div>
+
+                <div class="col-md-4">
+                    <label class="form-label">Kecamatan</label>
+                    <input type="text" class="form-control @error('kecamatan') is-invalid @enderror" name="kecamatan" id="kecamatanInput" value="{{ old('kecamatan') }}">
+                    @error('kecamatan')
+                        <div class="invalid-feedback">{{ $message }}</div>
+                    @enderror
+                </div>
+
+                <div class="col-md-4">
+                    <label class="form-label">Kelurahan</label>
+                    <input type="text" class="form-control @error('kelurahan') is-invalid @enderror" name="kelurahan" id="kelurahanInput" value="{{ old('kelurahan') }}">
+                    @error('kelurahan')
+                        <div class="invalid-feedback">{{ $message }}</div>
+                    @enderror
+                </div>
+
+                <div class="col-md-2">
+                    <label class="form-label">RW</label>
+                    <input type="text" class="form-control @error('rw') is-invalid @enderror" name="rw" id="rwInput" value="{{ old('rw') }}" maxlength="3">
+                    @error('rw')
+                        <div class="invalid-feedback">{{ $message }}</div>
+                    @enderror
+                </div>
+
+                <div class="col-md-2">
+                    <label class="form-label">RT</label>
+                    <input type="text" class="form-control @error('rt') is-invalid @enderror" name="rt" id="rtInput" value="{{ old('rt') }}" maxlength="3">
+                    @error('rt')
+                        <div class="invalid-feedback">{{ $message }}</div>
+                    @enderror
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label">Dasawisma</label>
+                    <select class="form-select @error('dasawisma') is-invalid @enderror" name="dasawisma" id="dasawismaSelect">
+                        <option value="">-- Pilih Dasawisma --</option>
+                        @foreach(['Dahlia 1','Dahlia 2','Dahlia 3','Dahlia 4','Bougenville 1','Bougenville 2','Bougenville 3'] as $dasa)
+                            <option value="{{ $dasa }}" {{ old('dasawisma') == $dasa ? 'selected' : '' }}>{{ $dasa }}</option>
+                        @endforeach
+                    </select>
+                    @error('dasawisma')
+                        <div class="invalid-feedback">{{ $message }}</div>
+                    @enderror
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label">Jenis Sampah</label>
+                    <input type="text" class="form-control @error('jenis_sampah') is-invalid @enderror" name="jenis_sampah" value="{{ old('jenis_sampah') }}" placeholder="Contoh: Plastik, Kertas, Logam">
+                    @error('jenis_sampah')
                         <div class="invalid-feedback">{{ $message }}</div>
                     @enderror
                 </div>
@@ -68,6 +133,7 @@
                     @error('foto')
                         <div class="invalid-feedback">{{ $message }}</div>
                     @enderror
+                    <div class="form-text">Ukuran foto maksimal 2MB dengan format (.jpg, .jpeg, .png)</div>
                     <div class="mt-2">
                         <img id="fotoPreview" src="#" alt="Preview" class="img-thumbnail d-none" style="max-width: 150px;">
                     </div>
@@ -97,6 +163,29 @@
 
 @push('scripts')
 <script>
+    const wargaSelect = document.getElementById('wargaSelect');
+    const kecamatanInput = document.getElementById('kecamatanInput');
+    const kelurahanInput = document.getElementById('kelurahanInput');
+    const rtInput = document.getElementById('rtInput');
+    const rwInput = document.getElementById('rwInput');
+    const dasawismaSelect = document.getElementById('dasawismaSelect');
+    const jkSelect = document.getElementById('jkSelect');
+
+    function syncFromWarga() {
+        const opt = wargaSelect.options[wargaSelect.selectedIndex];
+        if (!opt || !opt.value) return;
+
+        if (!kecamatanInput.value) kecamatanInput.value = opt.dataset.kecamatan || '';
+        if (!kelurahanInput.value) kelurahanInput.value = opt.dataset.kelurahan || '';
+        if (!rtInput.value) rtInput.value = opt.dataset.rt || '';
+        if (!rwInput.value) rwInput.value = opt.dataset.rw || '';
+        if (!dasawismaSelect.value) dasawismaSelect.value = opt.dataset.dasawisma || '';
+        if (!jkSelect.value) jkSelect.value = opt.dataset.jk || '';
+    }
+
+    wargaSelect.addEventListener('change', syncFromWarga);
+    window.addEventListener('load', syncFromWarga);
+
     document.getElementById('fotoInput').addEventListener('change', function(e) {
         const preview = document.getElementById('fotoPreview');
         if (this.files && this.files[0]) {

@@ -20,10 +20,11 @@ class RoleMiddleware
             }
         }
 
-        if (!$request->user() || !in_array($request->user()->role, $allowedRoles)) {
+        if (! $request->user() || ! in_array($request->user()->role, $allowedRoles)) {
             if ($request->expectsJson()) {
                 return response()->json(['message' => 'Unauthorized'], 403);
             }
+
             return redirect()->route('dashboard')->with('error', 'Anda tidak memiliki akses ke halaman tersebut.');
         }
 

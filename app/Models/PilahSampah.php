@@ -14,6 +14,12 @@ class PilahSampah extends Model
 
     protected $fillable = [
         'warga_id',
+        'kecamatan',
+        'kelurahan',
+        'rt',
+        'rw',
+        'dasawisma',
+        'jenis_sampah',
         'jenis_kelamin',
         'berat',
         'sedekah',
@@ -47,6 +53,6 @@ class PilahSampah extends Model
 
     public function getFotoUrlAttribute()
     {
-        return $this->foto ? asset('storage/' . $this->foto) : null;
+        return $this->foto ? asset('storage/'.$this->foto) : null;
     }
 }

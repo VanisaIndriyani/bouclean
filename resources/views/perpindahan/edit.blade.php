@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Edit Perpindahan - Bouclean')
+@section('title', 'Edit Perpindahan - Bouclear')
 
 @section('content')
 <div class="page-header d-flex justify-content-between align-items-center">

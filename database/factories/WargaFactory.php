@@ -2,10 +2,11 @@
 
 namespace Database\Factories;
 
+use App\Models\Warga;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Warga>
+ * @extends Factory<Warga>
  */
 class WargaFactory extends Factory
 {
@@ -27,7 +28,7 @@ class WargaFactory extends Factory
             'kelurahan' => $this->faker->streetName,
             'rt' => $this->faker->numerify('0##'),
             'rw' => $this->faker->numerify('0##'),
-            'dasawisma' => 'Dahlia ' . $this->faker->numerify('##'),
+            'dasawisma' => 'Dahlia '.$this->faker->numerify('##'),
         ];
     }
 }

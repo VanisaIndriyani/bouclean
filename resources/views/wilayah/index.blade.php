@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Wilayah Administrasi - Bouclean')
+@section('title', 'Wilayah Administrasi - Bouclear')
 
 @section('content')
 <div class="page-header d-flex justify-content-between align-items-center">
@@ -24,13 +24,18 @@
                         <span class="input-group-text bg-white">
                             <i class="bi bi-search text-muted"></i>
                         </span>
-                        <input type="text" class="form-control" name="search" placeholder="Cari nama pengguna..." value="{{ request('search') }}">
+                        <input type="text" class="form-control" name="search" placeholder="Cari kecamatan, kelurahan, RT, RW, dasawisma, atau nama..." value="{{ request('search') }}">
                     </div>
                 </div>
                 <div class="col-md-4">
                     <button type="submit" class="btn btn-secondary rounded-pill w-100">
-                        <i class="bi bi-funnel me-2"></i> Filter
+                        <i class="bi bi-search me-2"></i> Cari
                     </button>
+                </div>
+                <div class="col-md-2">
+                    <a href="{{ route('wilayah.index') }}" class="btn btn-outline-secondary rounded-pill w-100">
+                        Reset
+                    </a>
                 </div>
             </div>
         </form>

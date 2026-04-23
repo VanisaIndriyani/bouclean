@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Iuran Sampah - Bouclean')
+@section('title', 'Iuran Sampah - Bouclear')
 
 @section('content')
 <div class="page-header d-flex justify-content-between align-items-center">

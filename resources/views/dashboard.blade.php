@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Dashboard - Bouclean')
+@section('title', 'Dashboard - Bouclear')
 
 @push('styles')
 <style>
@@ -18,7 +18,7 @@
     <div class="d-flex justify-content-between align-items-center">
         <div>
             <h4 class="mb-0">Selamat Datang, {{ Auth::user()->name }}!</h4>
-            <p class="mb-0 opacity-75">Dashboard Bank Sampah Digital Bouclean</p>
+            <p class="mb-0 opacity-75">Dashboard Bank Sampah Digital Bouclear</p>
         </div>
         <div>
             <span class="badge bg-light text-dark fs-6">
@@ -116,11 +116,25 @@
     <div class="col-lg-8">
         <div class="card border-0 shadow-sm overflow-hidden h-100">
             <div class="card-header bg-white border-0 py-3 px-4 d-flex justify-content-between align-items-center">
-                <h6 class="mb-0 fw-bold"><i class="bi bi-graph-up me-2 text-primary"></i>Statistik Bulanan 2026</h6>
-                <div class="dropdown">
-                    <button class="btn btn-sm btn-light rounded-pill px-3" type="button" data-bs-toggle="dropdown">
-                        Tahun 2026 <i class="bi bi-chevron-down ms-1"></i>
-                    </button>
+                <h6 class="mb-0 fw-bold"><i class="bi bi-graph-up me-2 text-primary"></i>Statistik Bulanan {{ $selectedYear }}</h6>
+                <div class="d-flex gap-2">
+                    <a class="btn btn-sm btn-outline-primary rounded-pill px-3" href="{{ route('dashboard.export', ['year' => $selectedYear]) }}">
+                        <i class="bi bi-download me-1"></i> Excel
+                    </a>
+                    <div class="dropdown">
+                        <button class="btn btn-sm btn-light rounded-pill px-3" type="button" data-bs-toggle="dropdown">
+                            Tahun {{ $selectedYear }} <i class="bi bi-chevron-down ms-1"></i>
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0">
+                            @foreach($years as $y)
+                                <li>
+                                    <a class="dropdown-item {{ $selectedYear == $y ? 'active' : '' }}" href="{{ route('dashboard', ['year' => $y]) }}">
+                                        {{ $y }}
+                                    </a>
+                                </li>
+                            @endforeach
+                        </ul>
+                    </div>
                 </div>
             </div>
             <div class="card-body p-4">

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bouclean - Bank Sampah Plombokan</title>
+    <title>Bouclear - Bank Sampah Plombokan</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
@@ -306,7 +306,7 @@
         <div class="container">
             <a class="navbar-brand d-flex align-items-center" href="#">
                 <img src="{{ asset('img/Bougenville.png') }}" alt="Logo" height="45" class="me-2">
-                <span class="fw-bold fs-3 text-white brand-text-mobile" id="brand-text">Bouclean</span>
+                <span class="fw-bold fs-3 text-white brand-text-mobile" id="brand-text">Bouclear</span>
             </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <i class="bi bi-list text-white toggler-icon"></i>
@@ -330,7 +330,7 @@
         <div class="container">
             <div class="row align-items-center">
                 <div class="col-lg-8" data-aos="fade-right" data-aos-duration="1000">
-                    <h6 class="text-primary fw-bold text-uppercase ls-2 mb-3">Selamat Datang di Bouclean</h6>
+                    <h6 class="text-primary fw-bold text-uppercase ls-2 mb-3">Selamat Datang di Bouclear</h6>
                     <h1 class="hero-title mb-4">Kampung Warga <br><span class="text-gradient">Plombokan</span></h1>
                     <p class="lead fs-4 mb-5 opacity-75">Wujudkan Semarang Utara yang lebih asri. <br>"Dulu sampah sekarang rupiah yang berkah."</p>
                     <div class="d-flex flex-wrap gap-3">
@@ -356,7 +356,7 @@
                 <div class="col-lg-6 ps-lg-5" data-aos="fade-left">
                     <h6 class="text-success fw-bold text-uppercase mb-3 mt-4 mt-lg-0">Visi & Misi</h6>
                     <h2 class="fw-bold display-5 mb-4">Mengelola Sampah Menjadi Berkah</h2>
-                    <p class="text-muted fs-5 mb-4">Bouclean hadir sebagai solusi digital untuk warga Plombokan dalam mengelola limbah rumah tangga secara profesional, transparan, dan bernilai ekonomis.</p>
+                    <p class="text-muted fs-5 mb-4">Bouclear hadir sebagai solusi digital untuk warga Plombokan dalam mengelola limbah rumah tangga secara profesional, transparan, dan bernilai ekonomis.</p>
                     <div class="d-flex mb-4">
                         <div class="feature-icon-box me-3"><i class="bi bi-shield-check"></i></div>
                         <div>
@@ -380,7 +380,7 @@
     <section class="section-padding bg-light" id="features">
         <div class="container text-center">
             <h6 class="text-primary fw-bold text-uppercase mb-3">Layanan Kami</h6>
-            <h2 class="section-title">Fitur Utama Bouclean</h2>
+            <h2 class="section-title">Fitur Utama Bouclear</h2>
             <div class="row g-4 mt-2">
                 <div class="col-md-4" data-aos="fade-up" data-aos-delay="100">
                     <div class="glass-card h-100">
@@ -456,14 +456,14 @@
     <footer>
         <div class="container text-center">
             <img src="{{ asset('img/Bougenville.png') }}" alt="Logo" height="60" class="mb-4">
-            <h3 class="fw-bold mb-2">Bouclean</h3>
+            <h3 class="fw-bold mb-2">Bouclear</h3>
             <p class="opacity-50 mb-5">Bank Sampah Digital Kampung Warga Plombokan</p>
             <div class="d-flex justify-content-center gap-4 mb-5">
                 <a href="#" class="text-white fs-4"><i class="bi bi-facebook"></i></a>
                 <a href="#" class="text-white fs-4"><i class="bi bi-instagram"></i></a>
                 <a href="#" class="text-white fs-4"><i class="bi bi-youtube"></i></a>
             </div>
-            <p class="small opacity-50 mb-0">&copy; {{ date('Y') }} Bouclean Plombokan. Made with <i class="bi bi-heart-fill text-danger"></i> for Semarang Utara.</p>
+            <p class="small opacity-50 mb-0">&copy; {{ date('Y') }} Bouclear Plombokan. Made with <i class="bi bi-heart-fill text-danger"></i> for Semarang Utara.</p>
         </div>
     </footer>
 

@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Login - Bouclean')
+@section('title', 'Login - Bouclear')
 
 @section('content')
 <div class="login-page">
@@ -12,7 +12,7 @@
                         <div class="brand-logo mb-2 bg-transparent border-0">
                             <img src="{{ asset('img/Bougenville.png') }}" alt="Logo" style="width: 80px; height: auto;">
                         </div>
-                        <h4 class="mb-0 text-white fw-bold">Bouclean</h4>
+                        <h4 class="mb-0 text-white fw-bold">Bouclear</h4>
                         <p class="mb-0 text-white opacity-75 small">Bank Sampah Digital</p>
                     </div>
                     <div class="card-body p-4">
@@ -53,7 +53,7 @@
                             <div class="mb-4">
                                 <div class="form-check">
                                     <input type="checkbox" class="form-check-input" name="remember" id="remember">
-                                    <label class="form-check-label" for="remember">Ingat saya</label>
+                                    <label class="form-check-label" for="remember">Simpan login saya</label>
                                 </div>
                             </div>
 

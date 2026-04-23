@@ -27,12 +27,12 @@ class IuranSampahController extends Controller
 
         if ($request->has('search')) {
             $search = $request->search;
-            $query->where(function($q) use ($search) {
+            $query->where(function ($q) use ($search) {
                 $q->where('petugas', 'like', "%{$search}%")
-                  ->orWhereHas('warga', function($qw) use ($search) {
-                      $qw->where('nama_lengkap', 'like', "%{$search}%")
-                        ->orWhere('nik', 'like', "%{$search}%");
-                  });
+                    ->orWhereHas('warga', function ($qw) use ($search) {
+                        $qw->where('nama_lengkap', 'like', "%{$search}%")
+                            ->orWhere('nik', 'like', "%{$search}%");
+                    });
             });
         }
 
@@ -49,6 +49,7 @@ class IuranSampahController extends Controller
         $wargas = Warga::orderBy('nama_lengkap')->get();
         $bulanList = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
         $tahunList = range(date('Y'), date('Y') - 5);
+
         return view('iuran-sampah.create', compact('wargas', 'bulanList', 'tahunList'));
     }
 
@@ -66,7 +67,7 @@ class IuranSampahController extends Controller
 
         $validated['user_id'] = Auth::id();
 
-        if ($validated['status'] === 'lunas' && !$request->has('tanggal_bayar')) {
+        if ($validated['status'] === 'lunas' && ! $request->has('tanggal_bayar')) {
             $validated['tanggal_bayar'] = date('Y-m-d');
         }
 
@@ -80,6 +81,7 @@ class IuranSampahController extends Controller
         $wargas = Warga::orderBy('nama_lengkap')->get();
         $bulanList = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
         $tahunList = range(date('Y'), date('Y') - 5);
+
         return view('iuran-sampah.edit', compact('iuranSampah', 'wargas', 'bulanList', 'tahunList'));
     }
 
@@ -103,6 +105,7 @@ class IuranSampahController extends Controller
     public function destroy(IuranSampah $iuranSampah)
     {
         $iuranSampah->delete();
+
         return redirect()->route('iuran-sampah.index')->with('success', 'Data iuran sampah berhasil dihapus.');
     }
 }

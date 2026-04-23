@@ -2,10 +2,12 @@
 
 namespace Database\Factories;
 
+use App\Models\IuranSampah;
+use App\Models\Warga;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\IuranSampah>
+ * @extends Factory<IuranSampah>
  */
 class IuranSampahFactory extends Factory
 {
@@ -17,7 +19,7 @@ class IuranSampahFactory extends Factory
     public function definition(): array
     {
         return [
-            'warga_id' => \App\Models\Warga::factory(),
+            'warga_id' => Warga::factory(),
             'user_id' => 1,
             'bulan' => $this->faker->monthName,
             'tahun' => date('Y'),
