@@ -82,7 +82,7 @@
 
         /* Hero Section */
         .hero-section {
-            background: linear-gradient(rgba(0,0,0,0.65), rgba(0,0,0,0.65)), url('https://images.unsplash.com/photo-1532996122724-e3c354a0b15b?ixlib=rb-1.2.1&auto=format&fit=crop&w=1950&q=80');
+            background: linear-gradient(rgba(0,0,0,0.65), rgba(0,0,0,0.65)), url('https://images.unsplash.com/photo-1618477461853-cf6ed80faba5?auto=format&fit=crop&w=1950&q=80');
             background-size: cover;
             background-position: center;
             background-attachment: fixed;
@@ -351,13 +351,13 @@
                     <div class="position-relative">
                         <div class="row g-3">
                             <div class="col-6">
-                                <img src="https://images.unsplash.com/photo-1526045478516-99145907023c?auto=format&fit=crop&w=800&q=80" alt="Kegiatan Bunga-Bunga" class="img-fluid rounded-5 shadow-sm w-100" style="height: 220px; object-fit: cover;">
+                                <img src="https://images.unsplash.com/photo-1604187351574-c75ca79f5807?auto=format&fit=crop&w=800&q=80" alt="Kegiatan Bank Sampah" class="img-fluid rounded-5 shadow-sm w-100" style="height: 220px; object-fit: cover;">
                             </div>
                             <div class="col-6">
-                                <img src="https://images.unsplash.com/photo-1469259943454-aa100abba749?auto=format&fit=crop&w=800&q=80" alt="Kegiatan Bunga-Bunga" class="img-fluid rounded-5 shadow-sm w-100" style="height: 220px; object-fit: cover;">
+                                <img src="https://images.unsplash.com/photo-1611284446314-60a58ac0deb9?auto=format&fit=crop&w=800&q=80" alt="Pemilahan Sampah" class="img-fluid rounded-5 shadow-sm w-100" style="height: 220px; object-fit: cover;">
                             </div>
                             <div class="col-12">
-                                <img src="https://images.unsplash.com/photo-1501004318641-b39e6451bec6?auto=format&fit=crop&w=1200&q=80" alt="Kegiatan Bunga-Bunga" class="img-fluid rounded-5 shadow-sm w-100" style="height: 240px; object-fit: cover;">
+                                <img src="https://images.unsplash.com/photo-1605600659908-0ef719419d41?auto=format&fit=crop&w=1200&q=80" alt="Pengelolaan Sampah" class="img-fluid rounded-5 shadow-sm w-100" style="height: 240px; object-fit: cover;">
                             </div>
                         </div>
                     </div>

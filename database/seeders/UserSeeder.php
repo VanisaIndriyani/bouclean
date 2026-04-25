@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use App\Models\IuranSampah;
+use App\Models\KesehatanWarga;
 use App\Models\PilahSampah;
 use App\Models\User;
 use App\Models\Warga;
@@ -57,6 +58,14 @@ class UserSeeder extends Seeder
         ];
 
         for ($i = 1; $i <= 15; $i++) {
+            $familyIndex = (int) ceil($i / 3);
+            $noKk = '337402'.str_pad((string) $familyIndex, 10, '0', STR_PAD_LEFT);
+            $statusDalamKeluarga = match ($i % 3) {
+                1 => 'Kepala Keluarga',
+                2 => 'Istri',
+                default => 'Anak',
+            };
+
             $warga = Warga::create([
                 'user_id' => $user->id,
                 'nama_lengkap' => 'Warga '.$i.' Plombokan',
@@ -69,7 +78,34 @@ class UserSeeder extends Seeder
                 'rt' => '001',
                 'rw' => '002',
                 'dasawisma' => 'Bougenville 1',
+                'status_dalam_keluarga' => $statusDalamKeluarga,
+                'no_kk' => $noKk,
+                'no_register_pkk' => 'PKK-'.str_pad((string) $i, 5, '0', STR_PAD_LEFT),
+                'agama' => 'Islam',
+                'status_perkawinan' => ($statusDalamKeluarga === 'Anak') ? 'Belum Kawin' : 'Kawin',
+                'status_tinggal' => 'Tinggal Tetap',
+                'akseptor_kb' => (bool) rand(0, 1),
+                'aktif_posyandu' => (bool) rand(0, 1),
             ]);
+
+            $kesehatanCount = rand(1, 2);
+            for ($k = 0; $k < $kesehatanCount; $k++) {
+                $tanggalLaporan = Carbon::create(2026, rand(1, 4), rand(1, 28));
+
+                KesehatanWarga::create([
+                    'warga_id' => $warga->id,
+                    'kek' => (bool) rand(0, 1),
+                    'anemia' => (bool) rand(0, 1),
+                    'haid_lebih_7_hari' => (bool) rand(0, 1),
+                    'belum_imunisasi' => (bool) rand(0, 1),
+                    'tbc_mangkir' => (bool) rand(0, 1),
+                    'remaja_rokok' => (bool) rand(0, 1),
+                    'ada_jentik' => (bool) rand(0, 1),
+                    'tanggal_laporan' => $tanggalLaporan,
+                    'created_at' => $tanggalLaporan,
+                    'updated_at' => $tanggalLaporan,
+                ]);
+            }
 
             // Data untuk grafik tahun 2026 (Januari - April)
             foreach ([1, 2, 3, 4] as $num) {
