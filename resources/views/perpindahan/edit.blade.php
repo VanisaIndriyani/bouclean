@@ -8,9 +8,6 @@
         <h4 class="mb-0">Edit Perpindahan Warga</h4>
         <p class="mb-0 opacity-75">Edit data perpindahan</p>
     </div>
-    <a href="{{ route('perpindahan.index') }}" class="btn btn-outline-secondary rounded-pill">
-        <i class="bi bi-arrow-left me-2"></i> Kembali
-    </a>
 </div>
 
 <div class="card border-0 shadow-sm">
@@ -26,7 +23,7 @@
                         <option value="">-- Pilih Warga --</option>
                         @foreach($wargas as $warga)
                             <option value="{{ $warga->id }}" {{ old('warga_id', $perpindahan->warga_id) == $warga->id ? 'selected' : '' }}>
-                                {{ $warga->nama_lengkap }} - {{ $warga->nik }}
+                                {{ $warga->nama_lengkap }} - {{ $warga->nik_masked }}
                             </option>
                         @endforeach
                     </select>
@@ -82,12 +79,12 @@
                 @endif
             </div>
 
-            <div class="mt-4 d-flex gap-2">
+            <div class="mt-4 d-flex justify-content-end gap-2">
                 <button type="submit" class="btn btn-success rounded-pill px-4">
                     <i class="bi bi-check-lg me-2"></i> Update
                 </button>
                 <a href="{{ route('perpindahan.index') }}" class="btn btn-outline-secondary rounded-pill px-4">
-                    Batal
+                    <i class="bi bi-arrow-left me-2"></i> Kembali
                 </a>
             </div>
         </form>

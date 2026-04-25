@@ -55,6 +55,28 @@ class IuranSampahController extends Controller
 
     public function store(Request $request)
     {
+        $bulan = $request->input('bulan');
+        if (is_numeric($bulan)) {
+            $bulanNumber = (int) $bulan;
+            $bulanMap = [
+                1 => 'Januari',
+                2 => 'Februari',
+                3 => 'Maret',
+                4 => 'April',
+                5 => 'Mei',
+                6 => 'Juni',
+                7 => 'Juli',
+                8 => 'Agustus',
+                9 => 'September',
+                10 => 'Oktober',
+                11 => 'November',
+                12 => 'Desember',
+            ];
+            if (isset($bulanMap[$bulanNumber])) {
+                $request->merge(['bulan' => $bulanMap[$bulanNumber]]);
+            }
+        }
+
         $validated = $request->validate([
             'warga_id' => 'required|exists:wargas,id',
             'bulan' => 'required|in:Januari,Februari,Maret,April,Mei,Juni,Juli,Agustus,September,Oktober,November,Desember',
@@ -76,17 +98,42 @@ class IuranSampahController extends Controller
         return redirect()->route('iuran-sampah.index')->with('success', 'Data iuran sampah berhasil ditambahkan.');
     }
 
-    public function edit(IuranSampah $iuranSampah)
+    public function edit(IuranSampah $iuran_sampah)
     {
         $wargas = Warga::orderBy('nama_lengkap')->get();
         $bulanList = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
         $tahunList = range(date('Y'), date('Y') - 5);
+        $iuranSampah = $iuran_sampah;
 
         return view('iuran-sampah.edit', compact('iuranSampah', 'wargas', 'bulanList', 'tahunList'));
     }
 
-    public function update(Request $request, IuranSampah $iuranSampah)
+    public function update(Request $request, IuranSampah $iuran_sampah)
     {
+        $iuranSampah = $iuran_sampah;
+
+        $bulan = $request->input('bulan');
+        if (is_numeric($bulan)) {
+            $bulanNumber = (int) $bulan;
+            $bulanMap = [
+                1 => 'Januari',
+                2 => 'Februari',
+                3 => 'Maret',
+                4 => 'April',
+                5 => 'Mei',
+                6 => 'Juni',
+                7 => 'Juli',
+                8 => 'Agustus',
+                9 => 'September',
+                10 => 'Oktober',
+                11 => 'November',
+                12 => 'Desember',
+            ];
+            if (isset($bulanMap[$bulanNumber])) {
+                $request->merge(['bulan' => $bulanMap[$bulanNumber]]);
+            }
+        }
+
         $validated = $request->validate([
             'warga_id' => 'required|exists:wargas,id',
             'bulan' => 'required|in:Januari,Februari,Maret,April,Mei,Juni,Juli,Agustus,September,Oktober,November,Desember',
@@ -102,8 +149,10 @@ class IuranSampahController extends Controller
         return redirect()->route('iuran-sampah.index')->with('success', 'Data iuran sampah berhasil diperbarui.');
     }
 
-    public function destroy(IuranSampah $iuranSampah)
+    public function destroy(IuranSampah $iuran_sampah)
     {
+        $iuranSampah = $iuran_sampah;
+
         $iuranSampah->delete();
 
         return redirect()->route('iuran-sampah.index')->with('success', 'Data iuran sampah berhasil dihapus.');

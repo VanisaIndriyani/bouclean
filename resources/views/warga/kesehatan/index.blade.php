@@ -6,12 +6,9 @@
 <div class="page-header d-flex justify-content-between align-items-center">
     <div>
         <h4 class="mb-0">Kesehatan Warga</h4>
-        <p class="mb-0 opacity-75">{{ $warga->nama_lengkap }} ({{ $warga->nik }})</p>
+        <p class="mb-0 opacity-75">{{ $warga->nama_lengkap }} ({{ $warga->nik_masked }})</p>
     </div>
     <div class="d-flex gap-2">
-        <a href="{{ route('warga.index') }}" class="btn btn-outline-secondary rounded-pill">
-            <i class="bi bi-arrow-left me-2"></i> Kembali
-        </a>
         <a href="{{ route('warga.kesehatan.create', $warga) }}" class="btn btn-primary rounded-pill">
             <i class="bi bi-plus-lg me-2"></i> Tambah
         </a>
@@ -20,8 +17,14 @@
 
 <div class="card border-0 shadow-sm">
     <div class="card-body">
-        <div class="table-responsive">
-            <table class="table table-hover">
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2 mb-2">
+            <div class="text-muted small">
+                Menampilkan {{ $kesehatans->firstItem() ?? 0 }} - {{ $kesehatans->lastItem() ?? 0 }} dari {{ $kesehatans->total() }} data
+            </div>
+        </div>
+
+        <div class="table-responsive overflow-auto">
+            <table class="table table-hover align-middle text-nowrap" style="min-width: 1100px;">
                 <thead>
                     <tr>
                         <th width="50">No</th>
@@ -33,7 +36,7 @@
                         <th>Remaja Rokok</th>
                         <th>Ada Jentik</th>
                         <th>Tanggal Laporan</th>
-                        <th width="140">Aksi</th>
+                        <th width="140" class="text-nowrap">Actions</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -48,8 +51,8 @@
                         <td>{{ $k->remaja_rokok ? 'Ya' : 'Tidak' }}</td>
                         <td>{{ $k->ada_jentik ? 'Ya' : 'Tidak' }}</td>
                         <td>{{ $k->tanggal_laporan ? $k->tanggal_laporan->format('d/m/Y') : '-' }}</td>
-                        <td>
-                            <div class="btn-group">
+                        <td class="text-nowrap">
+                            <div class="d-flex flex-nowrap gap-1">
                                 <a href="{{ route('warga.kesehatan.edit', [$warga, $k]) }}" class="btn btn-sm btn-outline-primary rounded-pill">
                                     <i class="bi bi-pencil"></i>
                                 </a>
@@ -82,7 +85,12 @@
         <div class="mt-4">
             {{ $kesehatans->withQueryString()->links() }}
         </div>
+
+        <div class="mt-3 d-flex justify-content-end">
+            <a href="{{ route('warga.index') }}" class="btn btn-outline-secondary rounded-pill px-4">
+                <i class="bi bi-arrow-left me-2"></i> Kembali
+            </a>
+        </div>
     </div>
 </div>
 @endsection
-

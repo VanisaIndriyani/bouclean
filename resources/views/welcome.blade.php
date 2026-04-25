@@ -349,8 +349,17 @@
             <div class="row align-items-center">
                 <div class="col-lg-6" data-aos="fade-up">
                     <div class="position-relative">
-                        <img src="https://images.unsplash.com/photo-1532996122724-e3c354a0b15b?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80" alt="About" class="img-fluid rounded-5 shadow-2xl">
-                      
+                        <div class="row g-3">
+                            <div class="col-6">
+                                <img src="https://images.unsplash.com/photo-1526045478516-99145907023c?auto=format&fit=crop&w=800&q=80" alt="Kegiatan Bunga-Bunga" class="img-fluid rounded-5 shadow-sm w-100" style="height: 220px; object-fit: cover;">
+                            </div>
+                            <div class="col-6">
+                                <img src="https://images.unsplash.com/photo-1469259943454-aa100abba749?auto=format&fit=crop&w=800&q=80" alt="Kegiatan Bunga-Bunga" class="img-fluid rounded-5 shadow-sm w-100" style="height: 220px; object-fit: cover;">
+                            </div>
+                            <div class="col-12">
+                                <img src="https://images.unsplash.com/photo-1501004318641-b39e6451bec6?auto=format&fit=crop&w=1200&q=80" alt="Kegiatan Bunga-Bunga" class="img-fluid rounded-5 shadow-sm w-100" style="height: 240px; object-fit: cover;">
+                            </div>
+                        </div>
                     </div>
                 </div>
                 <div class="col-lg-6 ps-lg-5" data-aos="fade-left">
@@ -386,7 +395,7 @@
                     <div class="glass-card h-100">
                         <div class="feature-icon-box mx-auto"><i class="bi bi-recycle"></i></div>
                         <h4 class="fw-bold mb-3">Pilah Sampah</h4>
-                        <p class="text-muted">Setor sampah anorganik (plastik, kertas, logam) dan pantau berat serta harganya langsung dari dashboard.</p>
+                        <p class="text-muted">Setor sampah anorganik (Plastik, Kardus, Kertas dll) dan pantau berat serta harganya langsung dari dashboard.</p>
                     </div>
                 </div>
                 <div class="col-md-4" data-aos="fade-up" data-aos-delay="200">
@@ -423,6 +432,14 @@
                             </div>
                         </div>
                     </div>
+                    <div class="card border-0 bg-light rounded-4 overflow-hidden mb-4">
+                        <iframe
+                            src="https://www.google.com/maps?q=Balai%20Warga%20Plombokan%2C%20Semarang%20Utara&output=embed"
+                            style="border:0; width: 100%; height: 240px; display: block;"
+                            allowfullscreen=""
+                            loading="lazy"
+                            referrerpolicy="no-referrer-when-downgrade"></iframe>
+                    </div>
                     <div class="card border-0 bg-light p-4 rounded-4">
                         <div class="d-flex align-items-center">
                             <div class="feature-icon-box mb-0 me-3"><i class="bi bi-whatsapp"></i></div>
@@ -435,16 +452,17 @@
                 </div>
                 <div class="col-lg-6 col-md-8 mt-5 mt-lg-0" data-aos="fade-left">
                     <div class="glass-card">
-                        <form>
+                        <form action="{{ route('contact.store') }}" method="POST">
+                            @csrf
                             <div class="mb-3">
                                 <label class="form-label fw-bold">Nama Lengkap</label>
-                                <input type="text" class="form-control form-control-lg border-0 bg-light" placeholder="Masukkan nama Anda">
+                                <input type="text" class="form-control form-control-lg border-0 bg-light" name="nama_lengkap" placeholder="Masukkan nama Anda" value="{{ old('nama_lengkap') }}" required>
                             </div>
                             <div class="mb-3">
                                 <label class="form-label fw-bold">Pesan Anda</label>
-                                <textarea class="form-control form-control-lg border-0 bg-light" rows="4" placeholder="Tuliskan pesan atau pertanyaan"></textarea>
+                                <textarea class="form-control form-control-lg border-0 bg-light" name="pesan" rows="4" placeholder="Tuliskan pesan atau pertanyaan" required>{{ old('pesan') }}</textarea>
                             </div>
-                            <button type="button" class="btn btn-primary-modern btn-modern w-100 py-3">Kirim Sekarang</button>
+                            <button type="submit" class="btn btn-primary-modern btn-modern w-100 py-3">Kirim Sekarang</button>
                         </form>
                     </div>
                 </div>

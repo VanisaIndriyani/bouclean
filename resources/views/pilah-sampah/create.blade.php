@@ -8,9 +8,6 @@
         <h4 class="mb-0">Tambah Data Pilah Sampah</h4>
         <p class="mb-0 opacity-75">Form input data pilah sampah</p>
     </div>
-    <a href="{{ route('pilah-sampah.index') }}" class="btn btn-outline-secondary rounded-pill">
-        <i class="bi bi-arrow-left me-2"></i> Kembali
-    </a>
 </div>
 
 <div class="card border-0 shadow-sm">
@@ -32,7 +29,7 @@
                                 data-dasawisma="{{ $warga->dasawisma }}"
                                 data-jk="{{ $warga->jenis_kelamin }}"
                                 {{ old('warga_id') == $warga->id ? 'selected' : '' }}>
-                                {{ $warga->nama_lengkap }} - {{ $warga->nik }}
+                                {{ $warga->nama_lengkap }} - {{ $warga->nik_masked }}
                             </option>
                         @endforeach
                     </select>
@@ -129,7 +126,11 @@
 
                 <div class="col-md-4">
                     <label class="form-label">Foto</label>
-                    <input type="file" class="form-control @error('foto') is-invalid @enderror" name="foto" accept="image/*" id="fotoInput">
+                    <input type="file" class="d-none" name="foto" accept="image/*" id="fotoInput">
+                    <div class="input-group">
+                        <button type="button" class="btn btn-outline-secondary" id="fotoPickBtn">Choose File</button>
+                        <input type="text" class="form-control @error('foto') is-invalid @enderror" id="fotoName" placeholder="Choose File" readonly>
+                    </div>
                     @error('foto')
                         <div class="invalid-feedback">{{ $message }}</div>
                     @enderror
@@ -149,12 +150,12 @@
                 </div>
             </div>
 
-            <div class="mt-4 d-flex gap-2">
+            <div class="mt-4 d-flex justify-content-end gap-2">
                 <button type="submit" class="btn btn-success rounded-pill px-4">
                     <i class="bi bi-check-lg me-2"></i> Simpan
                 </button>
                 <a href="{{ route('pilah-sampah.index') }}" class="btn btn-outline-secondary rounded-pill px-4">
-                    Batal
+                    <i class="bi bi-arrow-left me-2"></i> Kembali
                 </a>
             </div>
         </form>
@@ -186,8 +187,14 @@
     wargaSelect.addEventListener('change', syncFromWarga);
     window.addEventListener('load', syncFromWarga);
 
+    document.getElementById('fotoPickBtn').addEventListener('click', function() {
+        document.getElementById('fotoInput').click();
+    });
+
     document.getElementById('fotoInput').addEventListener('change', function(e) {
         const preview = document.getElementById('fotoPreview');
+        const nameInput = document.getElementById('fotoName');
+        nameInput.value = this.files && this.files[0] ? this.files[0].name : '';
         if (this.files && this.files[0]) {
             const reader = new FileReader();
             reader.onload = function(e) {
@@ -195,6 +202,9 @@
                 preview.classList.remove('d-none');
             }
             reader.readAsDataURL(this.files[0]);
+        } else {
+            preview.src = '#';
+            preview.classList.add('d-none');
         }
     });
 </script>

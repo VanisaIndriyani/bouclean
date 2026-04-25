@@ -2,14 +2,27 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Perpindahan;
+use App\Models\User;
+use App\Models\Warga;
 use App\Models\Wilayah;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class WilayahController extends Controller
 {
     public function index(Request $request)
     {
+        $view = $request->get('view', 'wilayah');
         $query = Wilayah::query();
+
+        $dasawismaList = Wilayah::select('dasawisma')
+            ->whereNotNull('dasawisma')
+            ->where('dasawisma', '!=', '')
+            ->distinct()
+            ->orderBy('dasawisma')
+            ->pluck('dasawisma');
 
         if ($request->has('search')) {
             $search = $request->search;
@@ -23,9 +36,59 @@ class WilayahController extends Controller
             });
         }
 
+        $selectedDasawisma = $request->get('dasawisma', 'all');
+        if ($view === 'dasawisma' && $selectedDasawisma !== 'all') {
+            $query->where('dasawisma', $selectedDasawisma);
+        }
+
         $wilayahs = $query->orderBy('kecamatan')->orderBy('kelurahan')->paginate(10);
 
-        return view('wilayah.index', compact('wilayahs'));
+        $wargasDasawisma = collect();
+        $perpindahansDasawisma = collect();
+        $users = collect();
+
+        if ($view === 'dasawisma') {
+            $wargasDasawismaQuery = Warga::query()->orderBy('nama_lengkap');
+            if ($selectedDasawisma !== 'all') {
+                $wargasDasawismaQuery->where('dasawisma', $selectedDasawisma);
+            }
+            $wargasDasawisma = $wargasDasawismaQuery->limit(10)->get();
+
+            $perpindahansDasawismaQuery = Perpindahan::with(['warga', 'user'])->orderBy('created_at', 'desc');
+            if ($selectedDasawisma !== 'all') {
+                $perpindahansDasawismaQuery->whereHas('warga', function ($q) use ($selectedDasawisma) {
+                    $q->where('dasawisma', $selectedDasawisma);
+                });
+            }
+            $perpindahansDasawisma = $perpindahansDasawismaQuery->limit(10)->get();
+        }
+
+        if ($view !== 'dasawisma') {
+            $users = User::query()->orderBy('name')->get(['id', 'name', 'email', 'role']);
+
+            $lastActivityMap = DB::table('sessions')
+                ->selectRaw('user_id, MAX(last_activity) AS last_activity')
+                ->whereNotNull('user_id')
+                ->groupBy('user_id')
+                ->pluck('last_activity', 'user_id');
+
+            $users->transform(function (User $user) use ($lastActivityMap) {
+                $ts = $lastActivityMap[$user->id] ?? null;
+                $user->setAttribute('last_activity_at', $ts ? Carbon::createFromTimestamp((int) $ts) : null);
+
+                return $user;
+            });
+        }
+
+        return view('wilayah.index', compact(
+            'wilayahs',
+            'dasawismaList',
+            'view',
+            'selectedDasawisma',
+            'wargasDasawisma',
+            'perpindahansDasawisma',
+            'users'
+        ));
     }
 
     public function create()

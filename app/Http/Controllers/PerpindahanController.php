@@ -29,6 +29,12 @@ class PerpindahanController extends Controller
             $query->where('status', $request->status);
         }
 
+        if ($request->has('dasawisma') && $request->dasawisma !== 'all') {
+            $query->whereHas('warga', function ($q) use ($request) {
+                $q->where('dasawisma', $request->dasawisma);
+            });
+        }
+
         $perpindahans = $query->orderBy('created_at', 'desc')->paginate(10);
 
         return view('perpindahan.index', compact('perpindahans'));

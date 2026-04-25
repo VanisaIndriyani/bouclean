@@ -54,7 +54,7 @@
             <div class="card-body p-4">
                 <div class="d-flex justify-content-between align-items-center mb-3">
                     <div class="icon-shape bg-success bg-opacity-10 text-success rounded-3 p-3">
-                        <i class="bi bi-trash3 fs-4"></i>
+                        <i class="bi bi-recycle fs-4"></i>
                     </div>
                     <span class="badge bg-info bg-opacity-10 text-info rounded-pill px-3 py-2 small">
                         <i class="bi bi-recycle me-1"></i> Terpilah
@@ -69,7 +69,6 @@
         </div>
     </div>
 
-    @if(Auth::user()->role === 'admin')
     <div class="col-md-6 col-lg-3">
         <div class="card card-stat border-0 shadow-sm h-100 overflow-hidden">
             <div class="card-body p-4">
@@ -89,7 +88,6 @@
             </div>
         </div>
     </div>
-    @endif
 
     <div class="col-md-6 col-lg-3">
         <div class="card card-stat border-0 shadow-sm h-100 overflow-hidden">
@@ -160,12 +158,56 @@
                     </div>
                 </div>
                 @endif
-                <div class="text-center py-5">
-                    <div class="bg-light rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 80px; height: 80px;">
-                        <i class="bi bi-check2-circle text-muted fs-1"></i>
+
+                @if(Auth::user()->role === 'admin' && ($contactUnreadCount ?? 0) > 0)
+                    <div class="d-flex align-items-start p-3 bg-primary bg-opacity-10 rounded-3 mb-3 border-start border-4 border-primary">
+                        <i class="bi bi-chat-left-text-fill text-primary me-3 fs-4"></i>
+                        <div>
+                            <h6 class="mb-1 fw-bold">Pesan Masuk</h6>
+                            <p class="small text-muted mb-2">Ada {{ $contactUnreadCount }} pesan baru dari halaman Hubungi Kami.</p>
+                            <a href="#pesanMasuk" class="btn btn-sm btn-primary rounded-pill px-3">Lihat Pesan</a>
+                        </div>
                     </div>
-                    <p class="text-muted small">Tidak ada notifikasi baru lainnya.</p>
-                </div>
+                @endif
+
+                @if($perpindahanPending == 0 && (Auth::user()->role !== 'admin' || ($contactUnreadCount ?? 0) == 0))
+                    <div class="text-center py-5">
+                        <div class="bg-light rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 80px; height: 80px;">
+                            <i class="bi bi-check2-circle text-muted fs-1"></i>
+                        </div>
+                        <p class="text-muted small">Tidak ada notifikasi baru.</p>
+                    </div>
+                @endif
+
+                @if(Auth::user()->role === 'admin' && isset($recentContactMessages) && $recentContactMessages->count())
+                    <div id="pesanMasuk" class="mt-4">
+                        <h6 class="mb-3 fw-bold"><i class="bi bi-inbox me-2 text-primary"></i>Pesan Masuk (Terbaru)</h6>
+                        <div class="list-group list-group-flush">
+                            @foreach($recentContactMessages as $m)
+                                <div class="list-group-item px-0">
+                                    <div class="d-flex justify-content-between align-items-start gap-3">
+                                        <div class="flex-grow-1">
+                                            <div class="d-flex align-items-center gap-2">
+                                                <div class="fw-semibold">{{ $m->nama_lengkap }}</div>
+                                                @if(! $m->is_read)
+                                                    <span class="badge bg-primary">Baru</span>
+                                                @endif
+                                            </div>
+                                            <div class="text-muted small">{{ $m->created_at->format('d/m/Y H:i') }}</div>
+                                            <div class="mt-2 small">{{ $m->pesan }}</div>
+                                        </div>
+                                        @if(! $m->is_read)
+                                            <form action="{{ route('contact-messages.read', $m) }}" method="POST">
+                                                @csrf
+                                                <button type="submit" class="btn btn-sm btn-outline-primary rounded-pill">Tandai Dibaca</button>
+                                            </form>
+                                        @endif
+                                    </div>
+                                </div>
+                            @endforeach
+                        </div>
+                    </div>
+                @endif
             </div>
         </div>
     </div>
@@ -287,7 +329,7 @@
                     <div class="col-6 col-md-4 col-lg-2">
                         <a href="{{ route('pilah-sampah.create') }}" class="text-decoration-none">
                             <div class="quick-menu-item p-3 bg-success bg-opacity-10 rounded-4 text-center h-100">
-                                <i class="bi bi-trash3 fs-2 text-success"></i>
+                                <i class="bi bi-recycle fs-2 text-success"></i>
                                 <p class="mb-0 mt-2 small fw-bold text-dark">Input Sampah</p>
                             </div>
                         </a>

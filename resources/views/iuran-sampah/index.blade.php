@@ -17,15 +17,15 @@
     <div class="card-body">
         <form method="GET" action="{{ route('iuran-sampah.index') }}" class="mb-4">
             <div class="row g-3">
-                <div class="col-md-3">
+                <div class="col-md-2">
                     <select class="form-select" name="bulan">
                         <option value="all">-- Semua Bulan --</option>
                         @foreach(['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'] as $bulan)
-                            <option value="{{ $loop->iteration }}" {{ request('bulan') == $loop->iteration ? 'selected' : '' }}>{{ $bulan }}</option>
+                            <option value="{{ $bulan }}" {{ request('bulan') == $bulan ? 'selected' : '' }}>{{ $bulan }}</option>
                         @endforeach
                     </select>
                 </div>
-                <div class="col-md-3">
+                <div class="col-md-2">
                     <select class="form-select" name="tahun">
                         <option value="all">-- Semua Tahun --</option>
                         @for($y = date('Y'); $y >= date('Y') - 5; $y--)
@@ -33,23 +33,37 @@
                         @endfor
                     </select>
                 </div>
-                <div class="col-md-3">
+                <div class="col-md-2">
                     <select class="form-select" name="status">
                         <option value="all">-- Semua Status --</option>
                         <option value="lunas" {{ request('status') == 'lunas' ? 'selected' : '' }}>Lunas</option>
                         <option value="belum" {{ request('status') == 'belum' ? 'selected' : '' }}>Belum Lunas</option>
                     </select>
                 </div>
-                <div class="col-md-3">
+                <div class="col-md-4">
+                    <div class="input-group">
+                        <span class="input-group-text bg-white">
+                            <i class="bi bi-search text-muted"></i>
+                        </span>
+                        <input type="text" class="form-control" name="search" placeholder="Cari nama/NIK/petugas..." value="{{ request('search') }}">
+                    </div>
+                </div>
+                <div class="col-md-2">
                     <button type="submit" class="btn btn-secondary rounded-pill w-100">
-                        <i class="bi bi-funnel me-2"></i> Filter
+                        <i class="bi bi-search me-2"></i> Cari
                     </button>
                 </div>
             </div>
         </form>
 
-        <div class="table-responsive">
-            <table class="table table-hover">
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2 mb-2">
+            <div class="text-muted small">
+                Menampilkan {{ $iuranSampahs->firstItem() ?? 0 }} - {{ $iuranSampahs->lastItem() ?? 0 }} dari {{ $iuranSampahs->total() }} data
+            </div>
+        </div>
+
+        <div class="table-responsive overflow-auto">
+            <table class="table table-hover align-middle text-nowrap" style="min-width: 950px;">
                 <thead>
                     <tr>
                         <th width="50">No</th>
@@ -59,7 +73,7 @@
                         <th>Status</th>
                         <th>Tanggal Bayar</th>
                         <th>Petugas</th>
-                        <th width="120">Aksi</th>
+                        <th width="120" class="text-nowrap">Actions</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -68,9 +82,9 @@
                         <td class="text-center">{{ $iuranSampahs->firstItem() + $index }}</td>
                         <td>
                             <strong>{{ $iuran->warga->nama_lengkap }}</strong><br>
-                            <small class="text-muted">{{ $iuran->warga->nik }}</small>
+                            <small class="text-muted">{{ $iuran->warga->nik_masked }}</small>
                         </td>
-                        <td>{{ $iuran->nama_bulan }} {{ $iuran->tahun }}</td>
+                        <td>{{ $iuran->bulan }} {{ $iuran->tahun }}</td>
                         <td>Rp {{ number_format($iuran->nominal, 0, ',', '.') }}</td>
                         <td>{!! $iuran->status_badge !!}</td>
                         <td>
@@ -81,8 +95,8 @@
                             @endif
                         </td>
                         <td>{{ $iuran->petugas ?? '-' }}</td>
-                        <td>
-                            <div class="btn-group">
+                        <td class="text-nowrap">
+                            <div class="d-flex flex-nowrap gap-1">
                                 <a href="{{ route('iuran-sampah.edit', $iuran) }}" class="btn btn-sm btn-outline-primary rounded-pill">
                                     <i class="bi bi-pencil"></i>
                                 </a>

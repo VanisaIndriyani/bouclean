@@ -49,6 +49,7 @@ class Warga extends Model
         'hamil',
         'menyusui',
         'status',
+        'ajukan_perpindahan',
         'user_id',
     ];
 
@@ -66,6 +67,25 @@ class Warga extends Model
         'hamil' => 'boolean',
         'menyusui' => 'boolean',
     ];
+
+    public function getNikMaskedAttribute(): string
+    {
+        $nik = preg_replace('/\D+/', '', (string) ($this->attributes['nik'] ?? ''));
+
+        if (strlen($nik) === 16) {
+            return substr($nik, 0, 4).'*'.substr($nik, 5, 2).'*'.substr($nik, 8, 3).'*'.substr($nik, 12, 4);
+        }
+
+        if ($nik === '') {
+            return '-';
+        }
+
+        if (strlen($nik) <= 8) {
+            return str_repeat('*', strlen($nik));
+        }
+
+        return substr($nik, 0, 4).str_repeat('*', max(0, strlen($nik) - 8)).substr($nik, -4);
+    }
 
     public function user(): BelongsTo
     {

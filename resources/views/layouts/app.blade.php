@@ -257,9 +257,31 @@
 
             @if(Auth::user()->role === 'admin')
             <li class="nav-item">
-                <a class="nav-link {{ request()->routeIs('wilayah.*') ? 'active' : '' }}" href="{{ route('wilayah.index') }}">
-                    <i class="bi bi-map"></i> Wilayah Administrasi
+                <a class="nav-link d-flex align-items-center justify-content-between {{ request()->routeIs('wilayah.*') ? 'active' : '' }}"
+                   data-bs-toggle="collapse"
+                   href="#wilayahMenu"
+                   role="button"
+                   aria-expanded="{{ request()->routeIs('wilayah.*') ? 'true' : 'false' }}"
+                   aria-controls="wilayahMenu">
+                    <span><i class="bi bi-map"></i> Wilayah Administrasi</span>
+                    <i class="bi bi-chevron-down small"></i>
                 </a>
+                <div class="collapse {{ request()->routeIs('wilayah.*') ? 'show' : '' }}" id="wilayahMenu">
+                    <ul class="nav flex-column ms-4">
+                        <li class="nav-item">
+                            <a class="nav-link py-1 {{ request()->routeIs('wilayah.index') && request('view') !== 'dasawisma' ? 'active' : '' }}"
+                               href="{{ route('wilayah.index') }}">
+                                Wilayah Administrasi
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link py-1 {{ request()->routeIs('wilayah.index') && request('view') === 'dasawisma' ? 'active' : '' }}"
+                               href="{{ route('wilayah.index', ['view' => 'dasawisma', 'dasawisma' => 'all']) }}">
+                                Dasawisma
+                            </a>
+                        </li>
+                    </ul>
+                </div>
             </li>
             @endif
 
@@ -268,7 +290,7 @@
             </li>
             <li class="nav-item">
                 <a class="nav-link {{ request()->routeIs('pilah-sampah.*') ? 'active' : '' }}" href="{{ route('pilah-sampah.index') }}">
-                    <i class="bi bi-trash3"></i> Pilah Sampah
+                    <i class="bi bi-recycle"></i> Pilah Sampah
                 </a>
             </li>
 
@@ -291,7 +313,10 @@
                 <button class="btn btn-link text-dark me-2" onclick="toggleSidebar()">
                     <i class="bi bi-list fs-4"></i>
                 </button>
-                <div class="ms-auto">
+                <div class="ms-auto d-flex align-items-center gap-3">
+                    <div class="d-none d-lg-block text-muted small">
+                        Semarang Utara, Plombokan, RW III RT 5
+                    </div>
                     <div class="dropdown">
                         <a class="dropdown-toggle text-dark text-decoration-none d-flex align-items-center profile-dropdown" href="#" role="button" data-bs-toggle="dropdown">
                             @if(Auth::user()->avatar)

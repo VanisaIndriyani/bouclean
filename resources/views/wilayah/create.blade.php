@@ -8,9 +8,6 @@
         <h4 class="mb-0">Tambah Wilayah Administrasi</h4>
         <p class="mb-0 opacity-75">Form input wilayah administrasi</p>
     </div>
-    <a href="{{ route('wilayah.index') }}" class="btn btn-outline-secondary rounded-pill">
-        <i class="bi bi-arrow-left me-2"></i> Kembali
-    </a>
 </div>
 
 <div class="card border-0 shadow-sm">
@@ -68,12 +65,12 @@
                 </div>
             </div>
 
-            <div class="mt-4 d-flex gap-2">
+            <div class="mt-4 d-flex justify-content-end gap-2">
                 <button type="submit" class="btn btn-success rounded-pill px-4">
                     <i class="bi bi-check-lg me-2"></i> Simpan
                 </button>
                 <a href="{{ route('wilayah.index') }}" class="btn btn-outline-secondary rounded-pill px-4">
-                    Batal
+                    <i class="bi bi-arrow-left me-2"></i> Kembali
                 </a>
             </div>
         </form>

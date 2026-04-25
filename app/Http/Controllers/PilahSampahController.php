@@ -63,15 +63,18 @@ class PilahSampahController extends Controller
         return redirect()->route('pilah-sampah.index')->with('success', 'Data pilah sampah berhasil ditambahkan.');
     }
 
-    public function edit(PilahSampah $pilahSampah)
+    public function edit(PilahSampah $pilah_sampah)
     {
         $wargas = Warga::orderBy('nama_lengkap')->get();
+        $pilahSampah = $pilah_sampah;
 
         return view('pilah-sampah.edit', compact('pilahSampah', 'wargas'));
     }
 
-    public function update(Request $request, PilahSampah $pilahSampah)
+    public function update(Request $request, PilahSampah $pilah_sampah)
     {
+        $pilahSampah = $pilah_sampah;
+
         $validated = $request->validate([
             'warga_id' => 'required|exists:wargas,id',
             'kecamatan' => 'nullable|string|max:255',
@@ -101,8 +104,10 @@ class PilahSampahController extends Controller
         return redirect()->route('pilah-sampah.index')->with('success', 'Data pilah sampah berhasil diperbarui.');
     }
 
-    public function destroy(PilahSampah $pilahSampah)
+    public function destroy(PilahSampah $pilah_sampah)
     {
+        $pilahSampah = $pilah_sampah;
+
         if ($pilahSampah->foto) {
             Storage::disk('public')->delete($pilahSampah->foto);
         }

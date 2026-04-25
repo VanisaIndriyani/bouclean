@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Data Warga - Bouclear')
+@section('title', 'NAMA WARGA - Bouclear')
 
 @push('styles')
 <style>
@@ -60,23 +60,36 @@
     .pill-status { background: #2f5b9a; }
     .pill-activity { background: #1f9d55; }
     .pill-health { background: #2aa8c9; }
+
+    @media (max-width: 576px) {
+        .action-cell {
+            grid-template-columns: 1fr;
+        }
+        .action-icons {
+            flex-direction: row;
+            justify-content: flex-start;
+        }
+    }
 </style>
 @endpush
 
 @section('content')
 <div class="page-header d-flex justify-content-between align-items-center">
     <div>
-        <h4 class="mb-0">Data Warga</h4>
+        <h4 class="mb-0">NAMA WARGA</h4>
         <p class="mb-0 opacity-75">Kelola data warga Bank Sampah</p>
     </div>
     <a href="{{ route('warga.create') }}" class="btn btn-primary rounded-pill">
-        <i class="bi bi-plus-lg me-2"></i> Tambah Warga
+        <i class="bi bi-plus-lg me-2"></i> Tambah Nama Warga
     </a>
 </div>
 
 <div class="card border-0 shadow-sm">
     <div class="card-body">
         <form method="GET" action="{{ route('warga.index') }}" class="mb-4">
+            @if(request()->has('dasawisma'))
+                <input type="hidden" name="dasawisma" value="{{ request('dasawisma') }}">
+            @endif
             <div class="row g-3">
                 <div class="col-md-8">
                     <div class="input-group">
@@ -94,8 +107,14 @@
             </div>
         </form>
 
-        <div class="table-responsive">
-            <table class="table table-hover">
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2 mb-2">
+            <div class="text-muted small">
+                Menampilkan {{ $wargas->firstItem() ?? 0 }} - {{ $wargas->lastItem() ?? 0 }} dari {{ $wargas->total() }} data
+            </div>
+        </div>
+
+        <div class="table-responsive overflow-auto">
+            <table class="table table-hover align-middle text-nowrap" style="min-width: 1400px;">
                 <thead>
                     <tr>
                         <th width="50">No</th>
@@ -105,7 +124,7 @@
                         <th>Tempat, Tgl Lahir</th>
                         <th>Wilayah</th>
                         <th>Dasawisma</th>
-                        <th width="220">Aksi</th>
+                        <th width="220" class="text-nowrap">Actions</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -113,7 +132,7 @@
                     <tr>
                         <td class="text-center">{{ $wargas->firstItem() + $index }}</td>
                         <td>
-                            <span class="badge bg-light text-dark">{{ $warga->nik }}</span>
+                            <span class="badge bg-light text-dark">{{ $warga->nik_masked }}</span>
                         </td>
                         <td>
                             <strong>{{ $warga->nama_lengkap }}</strong>
@@ -157,7 +176,7 @@
                                         <i class="bi bi-activity"></i> Aktifitas
                                     </button>
                                     <a href="{{ route('warga.kesehatan.index', $warga) }}" class="pill-action pill-health">
-                                        <i class="bi bi-stethoscope"></i> Kesehatan
+                                        <i class="bi bi-heart-pulse"></i> Kesehatan
                                     </a>
                                 </div>
                             </div>
@@ -170,37 +189,51 @@
                                             <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                                         </div>
                                         <div class="modal-body">
-                                            <div class="row g-3">
-                                                <div class="col-md-6">
-                                                    <div class="p-3 bg-light rounded-3">
-                                                        <div class="fw-semibold">{{ $warga->nama_lengkap }}</div>
-                                                        <div class="text-muted small">{{ $warga->nik }}</div>
-                                                    </div>
-                                                </div>
-                                                <div class="col-md-6">
-                                                    <div class="p-3 bg-light rounded-3">
-                                                        <div class="small text-muted">Status</div>
-                                                        <div class="fw-semibold">{{ $warga->status ?? '-' }}</div>
-                                                    </div>
-                                                </div>
-                                                <div class="col-md-4">
-                                                    <div class="p-3 border rounded-3">
-                                                        <div class="small text-muted">Buta</div>
-                                                        <div class="fw-semibold">{{ $warga->buta ? 'Ya' : 'Tidak' }}</div>
-                                                    </div>
-                                                </div>
-                                                <div class="col-md-4">
-                                                    <div class="p-3 border rounded-3">
-                                                        <div class="small text-muted">Hamil</div>
-                                                        <div class="fw-semibold">{{ $warga->hamil ? 'Ya' : 'Tidak' }}</div>
-                                                    </div>
-                                                </div>
-                                                <div class="col-md-4">
-                                                    <div class="p-3 border rounded-3">
-                                                        <div class="small text-muted">Menyusui</div>
-                                                        <div class="fw-semibold">{{ $warga->menyusui ? 'Ya' : 'Tidak' }}</div>
-                                                    </div>
-                                                </div>
+                                            @php
+                                                $ajukanPerpindahanLabel = match ($warga->ajukan_perpindahan) {
+                                                    'kedalam_kita' => 'Ke Dalam Kita',
+                                                    'keluar_kota' => 'Keluar Kota',
+                                                    'tidak' => 'Tidak',
+                                                    default => '-',
+                                                };
+                                            @endphp
+                                            <div class="table-responsive">
+                                                <table class="table table-bordered align-middle mb-0">
+                                                    <thead class="table-light">
+                                                        <tr>
+                                                            <th>NIK</th>
+                                                            <th>Nama Lengkap</th>
+                                                            <th width="90">Buta</th>
+                                                            <th width="90">Hamil</th>
+                                                            <th width="110">Menyusui</th>
+                                                            <th width="120">Status</th>
+                                                            <th width="160">Ajukan Perpindahan</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        <tr>
+                                                            <td>{{ $warga->nik_masked }}</td>
+                                                            <td class="fw-semibold">{{ $warga->nama_lengkap }}</td>
+                                                            <td>
+                                                                <span class="badge {{ $warga->buta ? 'bg-success' : 'bg-secondary' }}">
+                                                                    {{ $warga->buta ? 'Ya' : 'Tidak' }}
+                                                                </span>
+                                                            </td>
+                                                            <td>
+                                                                <span class="badge {{ $warga->hamil ? 'bg-success' : 'bg-secondary' }}">
+                                                                    {{ $warga->hamil ? 'Ya' : 'Tidak' }}
+                                                                </span>
+                                                            </td>
+                                                            <td>
+                                                                <span class="badge {{ $warga->menyusui ? 'bg-success' : 'bg-secondary' }}">
+                                                                    {{ $warga->menyusui ? 'Ya' : 'Tidak' }}
+                                                                </span>
+                                                            </td>
+                                                            <td>{{ $warga->status ? ucfirst($warga->status) : '-' }}</td>
+                                                            <td>{{ $ajukanPerpindahanLabel }}</td>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
                                             </div>
                                         </div>
                                         <div class="modal-footer">
@@ -225,7 +258,7 @@
                                                 <div class="col-md-6">
                                                     <div class="p-3 bg-light rounded-3">
                                                         <div class="fw-semibold">{{ $warga->nama_lengkap }}</div>
-                                                        <div class="text-muted small">{{ $warga->nik }}</div>
+                                                        <div class="text-muted small">{{ $warga->nik_masked }}</div>
                                                     </div>
                                                 </div>
                                                 <div class="col-md-6">

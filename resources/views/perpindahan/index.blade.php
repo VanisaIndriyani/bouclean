@@ -16,6 +16,9 @@
 <div class="card border-0 shadow-sm">
     <div class="card-body">
         <form method="GET" action="{{ route('perpindahan.index') }}" class="mb-4">
+            @if(request()->has('dasawisma'))
+                <input type="hidden" name="dasawisma" value="{{ request('dasawisma') }}">
+            @endif
             <div class="row g-3">
                 <div class="col-md-4">
                     <div class="input-group">
@@ -41,8 +44,14 @@
             </div>
         </form>
 
-        <div class="table-responsive">
-            <table class="table table-hover">
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2 mb-2">
+            <div class="text-muted small">
+                Menampilkan {{ $perpindahans->firstItem() ?? 0 }} - {{ $perpindahans->lastItem() ?? 0 }} dari {{ $perpindahans->total() }} data
+            </div>
+        </div>
+
+        <div class="table-responsive overflow-auto">
+            <table class="table table-hover align-middle text-nowrap" style="min-width: 1100px;">
                 <thead>
                     <tr>
                         <th width="50">No</th>
@@ -52,7 +61,7 @@
                         <th>Diajukan Oleh</th>
                         <th>Status</th>
                         <th>Tindak Lanjut</th>
-                        <th width="180">Aksi</th>
+                        <th width="180" class="text-nowrap">Actions</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -61,7 +70,7 @@
                         <td class="text-center">{{ $perpindahans->firstItem() + $index }}</td>
                         <td>
                             <strong>{{ $perpindahan->warga->nama_lengkap }}</strong><br>
-                            <small class="text-muted">{{ $perpindahan->warga->nik }}</small>
+                            <small class="text-muted">{{ $perpindahan->warga->nik_masked }}</small>
                         </td>
                         <td>{{ $perpindahan->asal }}</td>
                         <td>{{ $perpindahan->tujuan }}</td>
@@ -70,9 +79,9 @@
                         <td>
                             <small class="text-muted">{{ $perpindahan->tindak_lanjut ?? '-' }}</small>
                         </td>
-                        <td>
+                        <td class="text-nowrap">
                             @if(Auth::user()->role === 'admin' && $perpindahan->status === 'pending')
-                                <div class="btn-group">
+                                <div class="d-flex flex-nowrap gap-1 mb-1">
                                     <form action="{{ route('perpindahan.approve', $perpindahan) }}" method="POST" class="d-inline">
                                         @csrf
                                         <button type="submit" class="btn btn-sm btn-success rounded-pill" title="Setujui">
@@ -87,7 +96,7 @@
                                     </form>
                                 </div>
                             @endif
-                            <div class="btn-group">
+                            <div class="d-flex flex-nowrap gap-1">
                                 <a href="{{ route('perpindahan.edit', $perpindahan) }}" class="btn btn-sm btn-outline-primary rounded-pill">
                                     <i class="bi bi-pencil"></i>
                                 </a>

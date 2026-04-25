@@ -33,45 +33,33 @@
             </div>
         </form>
 
-        <div class="table-responsive">
-            <table class="table table-hover">
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2 mb-2">
+            <div class="text-muted small">
+                Menampilkan {{ $pilahSampahs->firstItem() ?? 0 }} - {{ $pilahSampahs->lastItem() ?? 0 }} dari {{ $pilahSampahs->total() }} data
+            </div>
+        </div>
+
+        <div class="table-responsive overflow-auto">
+            <table class="table table-hover align-middle text-nowrap" style="min-width: 900px;">
                 <thead>
                     <tr>
                         <th width="50">No</th>
-                        <th>Kecamatan</th>
-                        <th>Kelurahan</th>
-                        <th>RW</th>
-                        <th>RT</th>
-                        <th>Dasawisma</th>
-                        <th>Kepala Keluarga</th>
-                        <th>Jenis Kelamin</th>
+                        <th>KK</th>
                         <th>Jenis Sampah</th>
                         <th>Berat (gr)</th>
                         <th>Sedekah</th>
                         <th>Harga</th>
                         <th>Foto</th>
-                        <th width="120">Aksi</th>
+                        <th width="120" class="text-nowrap">Actions</th>
                     </tr>
                 </thead>
                 <tbody>
                     @forelse($pilahSampahs as $index => $pilah)
                     <tr>
                         <td class="text-center">{{ $pilahSampahs->firstItem() + $index }}</td>
-                        <td>{{ $pilah->kecamatan ?? $pilah->warga->kecamatan }}</td>
-                        <td>{{ $pilah->kelurahan ?? $pilah->warga->kelurahan }}</td>
-                        <td>{{ $pilah->rw ?? $pilah->warga->rw }}</td>
-                        <td>{{ $pilah->rt ?? $pilah->warga->rt }}</td>
-                        <td>{{ $pilah->dasawisma ?? $pilah->warga->dasawisma }}</td>
                         <td>
-                            <strong>{{ $pilah->warga->nama_lengkap }}</strong><br>
-                            <small class="text-muted">{{ $pilah->warga->nik }}</small>
-                        </td>
-                        <td>
-                            @if($pilah->jenis_kelamin == 'Laki-laki')
-                                <span class="badge bg-primary">L</span>
-                            @else
-                                <span class="badge bg-danger">P</span>
-                            @endif
+                            <div class="fw-semibold">{{ $pilah->warga->no_kk ?: '-' }}</div>
+                            <div class="text-muted small">{{ $pilah->warga->nama_lengkap }}</div>
                         </td>
                         <td>{{ $pilah->jenis_sampah ?? '-' }}</td>
                         <td>{{ number_format($pilah->berat, 0, ',', '.') }} g</td>
@@ -85,15 +73,15 @@
                         <td>Rp {{ number_format($pilah->harga, 0, ',', '.') }}</td>
                         <td>
                             @if($pilah->foto_url)
-                                <a href="{{ $pilah->foto_url }}" target="_blank" class="btn btn-sm btn-outline-primary rounded-pill">
-                                    <i class="bi bi-image me-1"></i> Lihat Foto
+                                <a href="{{ $pilah->foto_url }}" target="_blank">
+                                    <img src="{{ $pilah->foto_url }}" alt="Foto" class="img-thumbnail" style="width: 64px; height: 64px; object-fit: cover;">
                                 </a>
                             @else
                                 <span class="text-muted">-</span>
                             @endif
                         </td>
-                        <td>
-                            <div class="btn-group">
+                        <td class="text-nowrap">
+                            <div class="d-flex flex-nowrap gap-1">
                                 <a href="{{ route('pilah-sampah.edit', $pilah) }}" class="btn btn-sm btn-outline-primary rounded-pill">
                                     <i class="bi bi-pencil"></i>
                                 </a>
@@ -111,7 +99,7 @@
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="14" class="text-center py-4">
+                        <td colspan="8" class="text-center py-4">
                             <div class="text-muted">
                                 <i class="bi bi-inbox fs-1 d-block mb-2"></i>
                                 <strong>Belum ada data pilah sampah</strong>

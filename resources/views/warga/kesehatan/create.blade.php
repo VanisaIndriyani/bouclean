@@ -6,11 +6,8 @@
 <div class="page-header d-flex justify-content-between align-items-center">
     <div>
         <h4 class="mb-0">Tambah Kesehatan Warga</h4>
-        <p class="mb-0 opacity-75">{{ $warga->nama_lengkap }} ({{ $warga->nik }})</p>
+        <p class="mb-0 opacity-75">{{ $warga->nama_lengkap }} ({{ $warga->nik_masked }})</p>
     </div>
-    <a href="{{ route('warga.kesehatan.index', $warga) }}" class="btn btn-outline-secondary rounded-pill">
-        <i class="bi bi-arrow-left me-2"></i> Kembali
-    </a>
 </div>
 
 <div class="card border-0 shadow-sm">
@@ -97,16 +94,15 @@
                 </div>
             </div>
 
-            <div class="mt-4 d-flex gap-2">
+            <div class="mt-4 d-flex justify-content-end gap-2">
                 <button type="submit" class="btn btn-success rounded-pill px-4">
                     <i class="bi bi-check-lg me-2"></i> Simpan
                 </button>
                 <a href="{{ route('warga.kesehatan.index', $warga) }}" class="btn btn-outline-secondary rounded-pill px-4">
-                    Batal
+                    <i class="bi bi-arrow-left me-2"></i> Kembali
                 </a>
             </div>
         </form>
     </div>
 </div>
 @endsection
-

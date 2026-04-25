@@ -2,11 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\ContactMessage;
 use App\Models\IuranSampah;
 use App\Models\Perpindahan;
 use App\Models\PilahSampah;
 use App\Models\Warga;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Maatwebsite\Excel\Concerns\FromArray;
 use Maatwebsite\Excel\Concerns\WithHeadings;
@@ -97,9 +99,19 @@ class DashboardController extends Controller
 
         $stats = $this->monthlyStatsForYear($selectedYear);
 
+        $contactUnreadCount = 0;
+        $recentContactMessages = collect();
+
+        if (Auth::user()->role === 'admin') {
+            $contactUnreadCount = ContactMessage::query()->where('is_read', false)->count();
+            $recentContactMessages = ContactMessage::query()->latest()->limit(5)->get();
+        }
+
         return view('dashboard', array_merge($stats, [
             'years' => $years,
             'selectedYear' => $selectedYear,
+            'contactUnreadCount' => $contactUnreadCount,
+            'recentContactMessages' => $recentContactMessages,
         ]));
     }
 

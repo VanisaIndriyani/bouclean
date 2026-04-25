@@ -49,14 +49,14 @@ class KesehatanWargaController extends Controller
 
     public function edit(Warga $warga, KesehatanWarga $kesehatan)
     {
-        abort_unless($kesehatan->warga_id === $warga->id, 404);
+        abort_unless((int) $kesehatan->warga_id === (int) $warga->id, 404);
 
         return view('warga.kesehatan.edit', compact('warga', 'kesehatan'));
     }
 
     public function update(Request $request, Warga $warga, KesehatanWarga $kesehatan)
     {
-        abort_unless($kesehatan->warga_id === $warga->id, 404);
+        abort_unless((int) $kesehatan->warga_id === (int) $warga->id, 404);
 
         $validated = $request->validate([
             'kek' => 'nullable|boolean',
@@ -84,7 +84,7 @@ class KesehatanWargaController extends Controller
 
     public function destroy(Warga $warga, KesehatanWarga $kesehatan)
     {
-        abort_unless($kesehatan->warga_id === $warga->id, 404);
+        abort_unless((int) $kesehatan->warga_id === (int) $warga->id, 404);
 
         $kesehatan->delete();
 

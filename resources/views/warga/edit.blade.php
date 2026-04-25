@@ -1,16 +1,13 @@
 @extends('layouts.app')
 
-@section('title', 'Edit Warga - Bouclear')
+@section('title', 'NAMA WARGA - Bouclear')
 
 @section('content')
 <div class="page-header d-flex justify-content-between align-items-center">
     <div>
-        <h4 class="mb-0">Edit Data Warga</h4>
-        <p class="mb-0 opacity-75">Edit data {{ $warga->nama_lengkap }}</p>
+        <h4 class="mb-0">NAMA WARGA</h4>
+        <p class="mb-0 opacity-75">Perbarui data nama warga</p>
     </div>
-    <a href="{{ route('warga.index') }}" class="btn btn-outline-secondary rounded-pill">
-        <i class="bi bi-arrow-left me-2"></i> Kembali
-    </a>
 </div>
 
 <div class="card border-0 shadow-sm">
@@ -38,11 +35,7 @@
 
                 <div class="col-md-6">
                     <label class="form-label">Jenis Kelamin <span class="text-danger">*</span></label>
-                    <select class="form-select @error('jenis_kelamin') is-invalid @enderror" name="jenis_kelamin" required>
-                        <option value="">-- Pilih --</option>
-                        <option value="Laki-laki" {{ old('jenis_kelamin', $warga->jenis_kelamin) == 'Laki-laki' ? 'selected' : '' }}>Laki-laki</option>
-                        <option value="Perempuan" {{ old('jenis_kelamin', $warga->jenis_kelamin) == 'Perempuan' ? 'selected' : '' }}>Perempuan</option>
-                    </select>
+                    <input type="text" class="form-control @error('jenis_kelamin') is-invalid @enderror" name="jenis_kelamin" value="{{ old('jenis_kelamin', $warga->jenis_kelamin) }}" placeholder="Contoh: Laki-laki / Perempuan" required>
                     @error('jenis_kelamin')
                         <div class="invalid-feedback">{{ $message }}</div>
                     @enderror
@@ -103,12 +96,7 @@
 
                 <div class="col-md-6">
                     <label class="form-label">Dasawisma <span class="text-danger">*</span></label>
-                    <select class="form-select @error('dasawisma') is-invalid @enderror" name="dasawisma" required>
-                        <option value="">-- Pilih Dasawisma --</option>
-                        @foreach(['Dahlia 1','Dahlia 2','Dahlia 3','Dahlia 4','Bougenville 1','Bougenville 2','Bougenville 3'] as $dasa)
-                            <option value="{{ $dasa }}" {{ old('dasawisma', $warga->dasawisma) == $dasa ? 'selected' : '' }}>{{ $dasa }}</option>
-                        @endforeach
-                    </select>
+                    <input type="text" class="form-control @error('dasawisma') is-invalid @enderror" name="dasawisma" value="{{ old('dasawisma', $warga->dasawisma) }}" placeholder="Contoh: Dahlia 1" required>
                     @error('dasawisma')
                         <div class="invalid-feedback">{{ $message }}</div>
                     @enderror
@@ -145,12 +133,7 @@
 
                 <div class="col-md-4">
                     <label class="form-label">Agama</label>
-                    <select class="form-select @error('agama') is-invalid @enderror" name="agama">
-                        <option value="">-- Pilih --</option>
-                        @foreach(['Islam','Kristen','Katolik','Hindu','Buddha','Konghucu','Lainnya'] as $agama)
-                            <option value="{{ $agama }}" {{ old('agama', $warga->agama) == $agama ? 'selected' : '' }}>{{ $agama }}</option>
-                        @endforeach
-                    </select>
+                    <input type="text" class="form-control @error('agama') is-invalid @enderror" name="agama" value="{{ old('agama', $warga->agama) }}" placeholder="Contoh: Islam">
                     @error('agama')
                         <div class="invalid-feedback">{{ $message }}</div>
                     @enderror
@@ -158,12 +141,7 @@
 
                 <div class="col-md-4">
                     <label class="form-label">Status Perkawinan</label>
-                    <select class="form-select @error('status_perkawinan') is-invalid @enderror" name="status_perkawinan">
-                        <option value="">-- Pilih --</option>
-                        @foreach(['Belum Kawin','Kawin','Cerai Hidup','Cerai Mati'] as $sp)
-                            <option value="{{ $sp }}" {{ old('status_perkawinan', $warga->status_perkawinan) == $sp ? 'selected' : '' }}>{{ $sp }}</option>
-                        @endforeach
-                    </select>
+                    <input type="text" class="form-control @error('status_perkawinan') is-invalid @enderror" name="status_perkawinan" value="{{ old('status_perkawinan', $warga->status_perkawinan) }}" placeholder="Contoh: Kawin">
                     @error('status_perkawinan')
                         <div class="invalid-feedback">{{ $message }}</div>
                     @enderror
@@ -171,12 +149,7 @@
 
                 <div class="col-md-4">
                     <label class="form-label">Status Tinggal</label>
-                    <select class="form-select @error('status_tinggal') is-invalid @enderror" name="status_tinggal">
-                        <option value="">-- Pilih --</option>
-                        @foreach(['Tinggal Tetap','Kontrak','Menumpang','Lainnya'] as $st)
-                            <option value="{{ $st }}" {{ old('status_tinggal', $warga->status_tinggal) == $st ? 'selected' : '' }}>{{ $st }}</option>
-                        @endforeach
-                    </select>
+                    <input type="text" class="form-control @error('status_tinggal') is-invalid @enderror" name="status_tinggal" value="{{ old('status_tinggal', $warga->status_tinggal) }}" placeholder="Contoh: Tinggal Tetap">
                     @error('status_tinggal')
                         <div class="invalid-feedback">{{ $message }}</div>
                     @enderror
@@ -229,10 +202,7 @@
 
                 <div class="col-md-3">
                     <label class="form-label">Akseptor KB</label>
-                    <select class="form-select @error('akseptor_kb') is-invalid @enderror" name="akseptor_kb">
-                        <option value="0" {{ old('akseptor_kb', (int) $warga->akseptor_kb) == 0 ? 'selected' : '' }}>Tidak</option>
-                        <option value="1" {{ old('akseptor_kb', (int) $warga->akseptor_kb) == 1 ? 'selected' : '' }}>Ya</option>
-                    </select>
+                    <input type="text" class="form-control @error('akseptor_kb') is-invalid @enderror" name="akseptor_kb" value="{{ old('akseptor_kb', $warga->akseptor_kb ? 'Ya' : 'Tidak') }}" placeholder="Ya / Tidak">
                     @error('akseptor_kb')
                         <div class="invalid-feedback">{{ $message }}</div>
                     @enderror
@@ -240,21 +210,15 @@
 
                 <div class="col-md-3">
                     <label class="form-label">Aktif Posyandu</label>
-                    <select class="form-select @error('aktif_posyandu') is-invalid @enderror" name="aktif_posyandu">
-                        <option value="0" {{ old('aktif_posyandu', (int) $warga->aktif_posyandu) == 0 ? 'selected' : '' }}>Tidak</option>
-                        <option value="1" {{ old('aktif_posyandu', (int) $warga->aktif_posyandu) == 1 ? 'selected' : '' }}>Ya</option>
-                    </select>
+                    <input type="text" class="form-control @error('aktif_posyandu') is-invalid @enderror" name="aktif_posyandu" value="{{ old('aktif_posyandu', $warga->aktif_posyandu ? 'Ya' : 'Tidak') }}" placeholder="Ya / Tidak">
                     @error('aktif_posyandu')
                         <div class="invalid-feedback">{{ $message }}</div>
                     @enderror
                 </div>
 
                 <div class="col-md-3">
-                    <label class="form-label">Bina Keluarga Balita</label>
-                    <select class="form-select @error('bina_keluarga_balita') is-invalid @enderror" name="bina_keluarga_balita">
-                        <option value="0" {{ old('bina_keluarga_balita', (int) $warga->bina_keluarga_balita) == 0 ? 'selected' : '' }}>Tidak</option>
-                        <option value="1" {{ old('bina_keluarga_balita', (int) $warga->bina_keluarga_balita) == 1 ? 'selected' : '' }}>Ya</option>
-                    </select>
+                    <label class="form-label">Mengikuti Program Bina Keluarga Balita</label>
+                    <input type="text" class="form-control @error('bina_keluarga_balita') is-invalid @enderror" name="bina_keluarga_balita" value="{{ old('bina_keluarga_balita', $warga->bina_keluarga_balita ? 'Ya' : 'Tidak') }}" placeholder="Ya / Tidak">
                     @error('bina_keluarga_balita')
                         <div class="invalid-feedback">{{ $message }}</div>
                     @enderror
@@ -262,10 +226,7 @@
 
                 <div class="col-md-3">
                     <label class="form-label">Memiliki Tabungan</label>
-                    <select class="form-select @error('memiliki_tabungan') is-invalid @enderror" name="memiliki_tabungan">
-                        <option value="0" {{ old('memiliki_tabungan', (int) $warga->memiliki_tabungan) == 0 ? 'selected' : '' }}>Tidak</option>
-                        <option value="1" {{ old('memiliki_tabungan', (int) $warga->memiliki_tabungan) == 1 ? 'selected' : '' }}>Ya</option>
-                    </select>
+                    <input type="text" class="form-control @error('memiliki_tabungan') is-invalid @enderror" name="memiliki_tabungan" value="{{ old('memiliki_tabungan', $warga->memiliki_tabungan ? 'Ya' : 'Tidak') }}" placeholder="Ya / Tidak">
                     @error('memiliki_tabungan')
                         <div class="invalid-feedback">{{ $message }}</div>
                     @enderror
@@ -273,10 +234,7 @@
 
                 <div class="col-md-4">
                     <label class="form-label">Mengikuti Kelompok Belajar</label>
-                    <select class="form-select @error('mengikuti_kelompok_belajar') is-invalid @enderror" name="mengikuti_kelompok_belajar">
-                        <option value="0" {{ old('mengikuti_kelompok_belajar', (int) $warga->mengikuti_kelompok_belajar) == 0 ? 'selected' : '' }}>Tidak</option>
-                        <option value="1" {{ old('mengikuti_kelompok_belajar', (int) $warga->mengikuti_kelompok_belajar) == 1 ? 'selected' : '' }}>Ya</option>
-                    </select>
+                    <input type="text" class="form-control @error('mengikuti_kelompok_belajar') is-invalid @enderror" name="mengikuti_kelompok_belajar" value="{{ old('mengikuti_kelompok_belajar', $warga->mengikuti_kelompok_belajar ? 'Ya' : 'Tidak') }}" placeholder="Ya / Tidak">
                     @error('mengikuti_kelompok_belajar')
                         <div class="invalid-feedback">{{ $message }}</div>
                     @enderror
@@ -291,18 +249,15 @@
                 </div>
 
                 <div class="col-md-4">
-                    <label class="form-label">Ikut Kegiatan Operasional</label>
-                    <select class="form-select @error('ikut_kegiatan_operasional') is-invalid @enderror" name="ikut_kegiatan_operasional">
-                        <option value="0" {{ old('ikut_kegiatan_operasional', (int) $warga->ikut_kegiatan_operasional) == 0 ? 'selected' : '' }}>Tidak</option>
-                        <option value="1" {{ old('ikut_kegiatan_operasional', (int) $warga->ikut_kegiatan_operasional) == 1 ? 'selected' : '' }}>Ya</option>
-                    </select>
+                    <label class="form-label">Ikut Dalam Kegiatan Koperasi</label>
+                    <input type="text" class="form-control @error('ikut_kegiatan_operasional') is-invalid @enderror" name="ikut_kegiatan_operasional" value="{{ old('ikut_kegiatan_operasional', $warga->ikut_kegiatan_operasional ? 'Ya' : 'Tidak') }}" placeholder="Ya / Tidak">
                     @error('ikut_kegiatan_operasional')
                         <div class="invalid-feedback">{{ $message }}</div>
                     @enderror
                 </div>
 
                 <div class="col-md-4">
-                    <label class="form-label">Jenis Operasi</label>
+                    <label class="form-label">Jenis Koperasi</label>
                     <input type="text" class="form-control @error('jenis_operasi') is-invalid @enderror" name="jenis_operasi" value="{{ old('jenis_operasi', $warga->jenis_operasi) }}">
                     @error('jenis_operasi')
                         <div class="invalid-feedback">{{ $message }}</div>
@@ -311,10 +266,7 @@
 
                 <div class="col-md-4">
                     <label class="form-label">Mengikuti PAUD/Sejenis</label>
-                    <select class="form-select @error('mengikuti_paud') is-invalid @enderror" name="mengikuti_paud">
-                        <option value="0" {{ old('mengikuti_paud', (int) $warga->mengikuti_paud) == 0 ? 'selected' : '' }}>Tidak</option>
-                        <option value="1" {{ old('mengikuti_paud', (int) $warga->mengikuti_paud) == 1 ? 'selected' : '' }}>Ya</option>
-                    </select>
+                    <input type="text" class="form-control @error('mengikuti_paud') is-invalid @enderror" name="mengikuti_paud" value="{{ old('mengikuti_paud', $warga->mengikuti_paud ? 'Ya' : 'Tidak') }}" placeholder="Ya / Tidak">
                     @error('mengikuti_paud')
                         <div class="invalid-feedback">{{ $message }}</div>
                     @enderror
@@ -322,10 +274,7 @@
 
                 <div class="col-md-4">
                     <label class="form-label">Berkebutuhan Khusus</label>
-                    <select class="form-select @error('berkebutuhan_khusus') is-invalid @enderror" name="berkebutuhan_khusus">
-                        <option value="0" {{ old('berkebutuhan_khusus', (int) $warga->berkebutuhan_khusus) == 0 ? 'selected' : '' }}>Tidak</option>
-                        <option value="1" {{ old('berkebutuhan_khusus', (int) $warga->berkebutuhan_khusus) == 1 ? 'selected' : '' }}>Ya</option>
-                    </select>
+                    <input type="text" class="form-control @error('berkebutuhan_khusus') is-invalid @enderror" name="berkebutuhan_khusus" value="{{ old('berkebutuhan_khusus', $warga->berkebutuhan_khusus ? 'Ya' : 'Tidak') }}" placeholder="Ya / Tidak">
                     @error('berkebutuhan_khusus')
                         <div class="invalid-feedback">{{ $message }}</div>
                     @enderror
@@ -338,10 +287,7 @@
 
                 <div class="col-md-3">
                     <label class="form-label">Buta</label>
-                    <select class="form-select @error('buta') is-invalid @enderror" name="buta">
-                        <option value="0" {{ old('buta', (int) $warga->buta) == 0 ? 'selected' : '' }}>Tidak</option>
-                        <option value="1" {{ old('buta', (int) $warga->buta) == 1 ? 'selected' : '' }}>Ya</option>
-                    </select>
+                    <input type="text" class="form-control @error('buta') is-invalid @enderror" name="buta" value="{{ old('buta', $warga->buta ? 'Ya' : 'Tidak') }}" placeholder="Ya / Tidak">
                     @error('buta')
                         <div class="invalid-feedback">{{ $message }}</div>
                     @enderror
@@ -349,10 +295,7 @@
 
                 <div class="col-md-3">
                     <label class="form-label">Hamil</label>
-                    <select class="form-select @error('hamil') is-invalid @enderror" name="hamil">
-                        <option value="0" {{ old('hamil', (int) $warga->hamil) == 0 ? 'selected' : '' }}>Tidak</option>
-                        <option value="1" {{ old('hamil', (int) $warga->hamil) == 1 ? 'selected' : '' }}>Ya</option>
-                    </select>
+                    <input type="text" class="form-control @error('hamil') is-invalid @enderror" name="hamil" value="{{ old('hamil', $warga->hamil ? 'Ya' : 'Tidak') }}" placeholder="Ya / Tidak">
                     @error('hamil')
                         <div class="invalid-feedback">{{ $message }}</div>
                     @enderror
@@ -360,10 +303,7 @@
 
                 <div class="col-md-3">
                     <label class="form-label">Menyusui</label>
-                    <select class="form-select @error('menyusui') is-invalid @enderror" name="menyusui">
-                        <option value="0" {{ old('menyusui', (int) $warga->menyusui) == 0 ? 'selected' : '' }}>Tidak</option>
-                        <option value="1" {{ old('menyusui', (int) $warga->menyusui) == 1 ? 'selected' : '' }}>Ya</option>
-                    </select>
+                    <input type="text" class="form-control @error('menyusui') is-invalid @enderror" name="menyusui" value="{{ old('menyusui', $warga->menyusui ? 'Ya' : 'Tidak') }}" placeholder="Ya / Tidak">
                     @error('menyusui')
                         <div class="invalid-feedback">{{ $message }}</div>
                     @enderror
@@ -371,19 +311,27 @@
 
                 <div class="col-md-3">
                     <label class="form-label">Status</label>
-                    <input type="text" class="form-control @error('status') is-invalid @enderror" name="status" value="{{ old('status', $warga->status) }}">
+                    <input type="text" class="form-control @error('status') is-invalid @enderror" name="status" value="{{ old('status', $warga->status ?? 'hidup') }}" placeholder="Contoh: hidup / meninggal">
                     @error('status')
+                        <div class="invalid-feedback">{{ $message }}</div>
+                    @enderror
+                </div>
+
+                <div class="col-md-3">
+                    <label class="form-label">Ajukan Perpindahan</label>
+                    <input type="text" class="form-control @error('ajukan_perpindahan') is-invalid @enderror" name="ajukan_perpindahan" value="{{ old('ajukan_perpindahan', $warga->ajukan_perpindahan ?? 'tidak') }}" placeholder="Contoh: kedalam_kita / keluar_kota / tidak">
+                    @error('ajukan_perpindahan')
                         <div class="invalid-feedback">{{ $message }}</div>
                     @enderror
                 </div>
             </div>
 
-            <div class="mt-4 d-flex gap-2">
+            <div class="mt-4 d-flex justify-content-end gap-2">
                 <button type="submit" class="btn btn-success rounded-pill px-4">
                     <i class="bi bi-check-lg me-2"></i> Update
                 </button>
                 <a href="{{ route('warga.index') }}" class="btn btn-outline-secondary rounded-pill px-4">
-                    Batal
+                    <i class="bi bi-arrow-left me-2"></i> Kembali
                 </a>
             </div>
         </form>

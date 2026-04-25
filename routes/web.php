@@ -1,12 +1,14 @@
 <?php
 
 use App\Http\Controllers\Auth\AuthController;
+use App\Http\Controllers\ContactMessageController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\IuranSampahController;
 use App\Http\Controllers\KesehatanWargaController;
 use App\Http\Controllers\PerpindahanController;
 use App\Http\Controllers\PilahSampahController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\UserController;
 use App\Http\Controllers\WargaController;
 use App\Http\Controllers\WilayahController;
 use Illuminate\Support\Facades\Route;
@@ -14,6 +16,7 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', function () {
     return view('welcome');
 });
+Route::post('/contact', [ContactMessageController::class, 'store'])->name('contact.store');
 
 Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
 Route::post('/login', [AuthController::class, 'login']);
@@ -50,6 +53,8 @@ Route::middleware(['auth', 'role:admin,user'])->group(function () {
         Route::delete('iuran-sampah/{iuran_sampah}', [IuranSampahController::class, 'destroy'])->name('iuran-sampah.destroy');
 
         Route::resource('wilayah', WilayahController::class)->except(['show', 'index']);
+        Route::resource('users', UserController::class)->only(['update', 'destroy']);
+        Route::post('contact-messages/{contactMessage}/read', [ContactMessageController::class, 'markRead'])->name('contact-messages.read');
 
         Route::post('/perpindahan/{perpindahan}/approve', [PerpindahanController::class, 'approve'])->name('perpindahan.approve');
         Route::post('/perpindahan/{perpindahan}/reject', [PerpindahanController::class, 'reject'])->name('perpindahan.reject');
