@@ -229,9 +229,17 @@
             <span class="fw-bold text-white fs-4">Bouclear</span>
         </div>
         <ul class="nav flex-column mt-2">
+            <li class="nav-item mt-2">
+                <div class="nav-header px-4 py-2 text-white-50 small text-uppercase">Dashboard</div>
+            </li>
             <li class="nav-item">
                 <a class="nav-link {{ request()->routeIs('dashboard') ? 'active' : '' }}" href="{{ route('dashboard') }}">
                     <i class="bi bi-speedometer2"></i> Dashboard
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#" data-bs-toggle="modal" data-bs-target="#panduanModal">
+                    <i class="bi bi-info-circle"></i> Panduan
                 </a>
             </li>
 
@@ -249,27 +257,6 @@
                     <i class="bi bi-arrow-left-right"></i> Perpindahan Warga
                 </a>
             </li>
-            <li class="nav-item">
-                <a class="nav-link {{ request()->routeIs('iuran-sampah.*') ? 'active' : '' }}" href="{{ route('iuran-sampah.index') }}">
-                    <i class="bi bi-cash-stack"></i> Iuran Sampah
-                </a>
-            </li>
-
-            @if(Auth::user()->role === 'admin')
-            <li class="nav-item mt-2">
-                <div class="nav-header px-4 py-2 text-white-50 small text-uppercase">Data Master</div>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link {{ request()->routeIs('wilayah.index') && request('view') === 'dasawisma' ? 'active' : '' }}" href="{{ route('wilayah.index', ['view' => 'dasawisma', 'dasawisma' => 'all']) }}">
-                    <i class="bi bi-diagram-3"></i> Dasawisma
-                </a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link {{ request()->routeIs('wilayah.index') && request('view') !== 'dasawisma' ? 'active' : '' }}" href="{{ route('wilayah.index') }}">
-                    <i class="bi bi-map"></i> Wilayah Administrasi
-                </a>
-            </li>
-            @endif
 
             <li class="nav-item mt-2">
                 <div class="nav-header px-4 py-2 text-white-50 small text-uppercase">Data Pilah Sampah</div>
@@ -280,7 +267,40 @@
                 </a>
             </li>
 
-            <li class="nav-item mt-3 px-3">
+            @if(Auth::user()->role === 'admin')
+            @php
+                $dataMasterActive = request()->routeIs('wilayah.index');
+                $dataMasterExpanded = $dataMasterActive ? 'show' : '';
+            @endphp
+            <li class="nav-item mt-2">
+                <div class="nav-header px-4 py-2 text-white-50 small text-uppercase">Data Master</div>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link d-flex align-items-center justify-content-between {{ $dataMasterActive ? 'active' : '' }}" href="#" data-bs-toggle="collapse" data-bs-target="#dataMasterMenu" aria-expanded="{{ $dataMasterActive ? 'true' : 'false' }}">
+                    <span><i class="bi bi-gear"></i> Wilayah Administrasi</span>
+                    <i class="bi bi-chevron-down small"></i>
+                </a>
+                <div class="collapse {{ $dataMasterExpanded }}" id="dataMasterMenu">
+                    <ul class="nav flex-column ms-4 my-1">
+                        <li class="nav-item">
+                            <a class="nav-link py-2 {{ request()->routeIs('wilayah.index') && request('view') !== 'dasawisma' ? 'active' : '' }}" href="{{ route('wilayah.index') }}">
+                                Wilayah Administrasi
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link py-2 {{ request()->routeIs('wilayah.index') && request('view') === 'dasawisma' ? 'active' : '' }}" href="{{ route('wilayah.index', ['view' => 'dasawisma', 'dasawisma' => 'all']) }}">
+                                Dasawisma
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </li>
+            @endif
+
+            <li class="nav-item mt-2">
+                <div class="nav-header px-4 py-2 text-white-50 small text-uppercase">Lainnya</div>
+            </li>
+            <li class="nav-item mt-1 px-3">
                 <form action="{{ route('logout') }}" method="POST">
                     @csrf
                     <button type="submit" class="btn btn-outline-light w-100 rounded-pill">
@@ -290,6 +310,20 @@
             </li>
         </ul>
     </nav>
+
+    <div class="modal fade" id="panduanModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Panduan</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="text-muted">Panduan belum tersedia.</div>
+                </div>
+            </div>
+        </div>
+    </div>
     @endauth
 
     <div class="main-content {{ !Auth::check() ? 'ms-0' : '' }}">

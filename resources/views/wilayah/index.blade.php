@@ -182,20 +182,22 @@
                     $penggunaCount = $penggunaCountMap[$countKey] ?? 0;
                 @endphp
                 <div class="modal fade" id="penggunaWilayahModal{{ $wilayah->id }}" tabindex="-1" aria-hidden="true">
-                    <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
                         <div class="modal-content">
                             <div class="modal-header">
                                 <h5 class="modal-title">Pengguna</h5>
                                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                             </div>
                             <div class="modal-body">
-                                <div class="table-responsive">
-                                    <table class="table table-hover align-middle text-nowrap mb-0">
+                                <div class="table-responsive overflow-auto" style="max-height: 70vh;">
+                                    <table class="table table-hover align-middle text-nowrap mb-0" style="min-width: 900px;">
                                         <thead class="table-light">
                                             <tr>
                                                 <th width="60">No</th>
-                                                <th>Nama Pengguna</th>
-                                                <th>NIK</th>
+                                                <th>Nama</th>
+                                                <th>Username</th>
+                                                <th>Aktifitas Terakhir</th>
+                                                <th width="120">Actions</th>
                                             </tr>
                                         </thead>
                                         <tbody>
@@ -207,10 +209,35 @@
                                                     <td class="text-center">{{ $i + 1 }}</td>
                                                     <td class="fw-semibold">{{ $w->nama_lengkap }}</td>
                                                     <td class="text-muted">{{ $w->nik_masked }}</td>
+                                                    <td>
+                                                        @if($w->updated_at)
+                                                            {{ $w->updated_at->format('d/m/Y H:i') }}
+                                                        @else
+                                                            <span class="text-muted">-</span>
+                                                        @endif
+                                                    </td>
+                                                    <td>
+                                                        @if(Auth::user()->role === 'admin')
+                                                            <div class="btn-group">
+                                                                <a href="{{ route('warga.edit', $w) }}" class="btn btn-sm btn-outline-primary rounded-pill" title="Edit">
+                                                                    <i class="bi bi-pencil"></i>
+                                                                </a>
+                                                                <form action="{{ route('warga.destroy', $w) }}" method="POST" class="d-inline">
+                                                                    @csrf
+                                                                    @method('DELETE')
+                                                                    <button type="submit" class="btn btn-sm btn-outline-danger rounded-pill" onclick="return confirm('Yakin hapus?')" title="Hapus">
+                                                                        <i class="bi bi-trash"></i>
+                                                                    </button>
+                                                                </form>
+                                                            </div>
+                                                        @else
+                                                            <span class="text-muted small">-</span>
+                                                        @endif
+                                                    </td>
                                                 </tr>
                                             @empty
                                                 <tr>
-                                                    <td colspan="3" class="text-center text-muted py-3">Belum ada data pengguna</td>
+                                                    <td colspan="5" class="text-center text-muted py-3">Belum ada data pengguna</td>
                                                 </tr>
                                             @endforelse
                                         </tbody>

@@ -110,7 +110,7 @@ class WilayahController extends Controller
                 ->all();
 
             $penggunaWargaMap = Warga::query()
-                ->select(['nama_lengkap', 'nik', 'kecamatan', 'kelurahan', 'rt', 'rw', 'dasawisma'])
+                ->select(['id', 'nama_lengkap', 'nik', 'kecamatan', 'kelurahan', 'rt', 'rw', 'dasawisma', 'updated_at'])
                 ->when($kecamatans->count(), fn ($q) => $q->whereIn('kecamatan', $kecamatans))
                 ->when($kelurahans->count(), fn ($q) => $q->whereIn('kelurahan', $kelurahans))
                 ->when($rts->count(), fn ($q) => $q->whereIn('rt', $rts))
