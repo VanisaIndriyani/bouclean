@@ -237,11 +237,7 @@
                     <i class="bi bi-speedometer2"></i> Dashboard
                 </a>
             </li>
-            <li class="nav-item">
-                <a class="nav-link" href="#" data-bs-toggle="modal" data-bs-target="#panduanModal">
-                    <i class="bi bi-info-circle"></i> Panduan
-                </a>
-            </li>
+           
 
             <li class="nav-item">
                 <div class="nav-header px-4 py-2 text-white-50 small text-uppercase">Data Dasawisma</div>
