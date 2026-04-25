@@ -46,6 +46,7 @@ class WargaController extends Controller
     {
         $request->merge([
             'jenis_kelamin' => $this->normalizeJenisKelamin($request->input('jenis_kelamin')),
+            'ajukan_perpindahan' => $this->normalizeAjukanPerpindahan($request->input('ajukan_perpindahan')),
         ]);
 
         $validated = $request->validate([
@@ -115,6 +116,7 @@ class WargaController extends Controller
     {
         $request->merge([
             'jenis_kelamin' => $this->normalizeJenisKelamin($request->input('jenis_kelamin')),
+            'ajukan_perpindahan' => $this->normalizeAjukanPerpindahan($request->input('ajukan_perpindahan')),
         ]);
 
         $validated = $request->validate([
@@ -213,6 +215,33 @@ class WargaController extends Controller
         }
 
         return false;
+    }
+
+    private function normalizeAjukanPerpindahan($value): ?string
+    {
+        $raw = trim((string) $value);
+        if ($raw === '') {
+            return null;
+        }
+
+        $normalized = mb_strtolower($raw);
+        $normalized = str_replace(['.', ',', '_', '-', '/'], ' ', $normalized);
+        $normalized = preg_replace('/\s+/', ' ', $normalized) ?? $normalized;
+        $normalized = trim($normalized);
+
+        if ($normalized === 'tidak' || $normalized === 'tdk' || $normalized === 'no') {
+            return 'tidak';
+        }
+
+        if (str_contains($normalized, 'ke dalam') || str_contains($normalized, 'kedalam')) {
+            return 'kedalam_kita';
+        }
+
+        if (str_contains($normalized, 'keluar')) {
+            return 'keluar_kota';
+        }
+
+        return $raw;
     }
 
     public function destroy(Warga $warga)

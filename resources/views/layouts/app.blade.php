@@ -234,9 +234,9 @@
                     <i class="bi bi-speedometer2"></i> Dashboard
                 </a>
             </li>
-            
+
             <li class="nav-item">
-                <div class="nav-header px-4 py-2 text-white-50 small text-uppercase">Data Master</div>
+                <div class="nav-header px-4 py-2 text-white-50 small text-uppercase">Data Dasawisma</div>
             </li>
 
             <li class="nav-item">
@@ -256,32 +256,18 @@
             </li>
 
             @if(Auth::user()->role === 'admin')
+            <li class="nav-item mt-2">
+                <div class="nav-header px-4 py-2 text-white-50 small text-uppercase">Data Master</div>
+            </li>
             <li class="nav-item">
-                <a class="nav-link d-flex align-items-center justify-content-between {{ request()->routeIs('wilayah.*') ? 'active' : '' }}"
-                   data-bs-toggle="collapse"
-                   href="#wilayahMenu"
-                   role="button"
-                   aria-expanded="{{ request()->routeIs('wilayah.*') ? 'true' : 'false' }}"
-                   aria-controls="wilayahMenu">
-                    <span><i class="bi bi-map"></i> Wilayah Administrasi</span>
-                    <i class="bi bi-chevron-down small"></i>
+                <a class="nav-link {{ request()->routeIs('wilayah.index') && request('view') === 'dasawisma' ? 'active' : '' }}" href="{{ route('wilayah.index', ['view' => 'dasawisma', 'dasawisma' => 'all']) }}">
+                    <i class="bi bi-diagram-3"></i> Dasawisma
                 </a>
-                <div class="collapse {{ request()->routeIs('wilayah.*') ? 'show' : '' }}" id="wilayahMenu">
-                    <ul class="nav flex-column ms-4">
-                        <li class="nav-item">
-                            <a class="nav-link py-1 {{ request()->routeIs('wilayah.index') && request('view') !== 'dasawisma' ? 'active' : '' }}"
-                               href="{{ route('wilayah.index') }}">
-                                Wilayah Administrasi
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link py-1 {{ request()->routeIs('wilayah.index') && request('view') === 'dasawisma' ? 'active' : '' }}"
-                               href="{{ route('wilayah.index', ['view' => 'dasawisma', 'dasawisma' => 'all']) }}">
-                                Dasawisma
-                            </a>
-                        </li>
-                    </ul>
-                </div>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link {{ request()->routeIs('wilayah.index') && request('view') !== 'dasawisma' ? 'active' : '' }}" href="{{ route('wilayah.index') }}">
+                    <i class="bi bi-map"></i> Wilayah Administrasi
+                </a>
             </li>
             @endif
 

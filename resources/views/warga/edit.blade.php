@@ -319,7 +319,20 @@
 
                 <div class="col-md-3">
                     <label class="form-label">Ajukan Perpindahan</label>
-                    <input type="text" class="form-control @error('ajukan_perpindahan') is-invalid @enderror" name="ajukan_perpindahan" value="{{ old('ajukan_perpindahan', $warga->ajukan_perpindahan ?? 'tidak') }}" placeholder="Contoh: kedalam_kita / keluar_kota / tidak">
+                    @php
+                        $ajukanValue = old('ajukan_perpindahan', $warga->ajukan_perpindahan ?? 'tidak');
+                        $ajukanDisplay = match ($ajukanValue) {
+                            'kedalam_kita' => 'kedalam kota',
+                            'keluar_kota' => 'keluar kota',
+                            default => $ajukanValue,
+                        };
+                    @endphp
+                    <input type="text" class="form-control @error('ajukan_perpindahan') is-invalid @enderror" name="ajukan_perpindahan" list="ajukan_perpindahan_list" value="{{ $ajukanDisplay }}" placeholder="Klik untuk pilih: kedalam kota / keluar kota / tidak">
+                    <datalist id="ajukan_perpindahan_list">
+                        <option value="kedalam kota"></option>
+                        <option value="keluar kota"></option>
+                        <option value="tidak"></option>
+                    </datalist>
                     @error('ajukan_perpindahan')
                         <div class="invalid-feedback">{{ $message }}</div>
                     @enderror

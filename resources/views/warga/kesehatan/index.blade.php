@@ -32,7 +32,7 @@
                         <th>Anemia</th>
                         <th>Haid &gt; 7 Hari</th>
                         <th>Belum Imunisasi</th>
-                        <th>TBC Mangkir</th>
+                        <th>TBC Tidak Berobat/Mangkir</th>
                         <th>Remaja Rokok</th>
                         <th>Ada Jentik</th>
                         <th>Tanggal Laporan</th>

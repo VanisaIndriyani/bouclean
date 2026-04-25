@@ -50,7 +50,7 @@
                 </div>
 
                 <div class="col-md-6">
-                    <label class="form-label">Dasawisma <span class="text-danger">*</span></label>
+                    <label class="form-label">Nama Dasawisma</label>
                     <input type="text" class="form-control @error('dasawisma') is-invalid @enderror" name="dasawisma" value="{{ old('dasawisma', $wilayah->dasawisma) }}" required>
                     @error('dasawisma')
                         <div class="invalid-feedback">{{ $message }}</div>

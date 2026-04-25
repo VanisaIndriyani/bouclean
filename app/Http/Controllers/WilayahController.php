@@ -46,6 +46,8 @@ class WilayahController extends Controller
         $wargasDasawisma = collect();
         $perpindahansDasawisma = collect();
         $users = collect();
+        $penggunaCountMap = [];
+        $penggunaWargaMap = [];
 
         if ($view === 'dasawisma') {
             $wargasDasawismaQuery = Warga::query()->orderBy('nama_lengkap');
@@ -78,6 +80,46 @@ class WilayahController extends Controller
 
                 return $user;
             });
+
+            $kecamatans = $wilayahs->getCollection()->pluck('kecamatan')->filter()->unique()->values();
+            $kelurahans = $wilayahs->getCollection()->pluck('kelurahan')->filter()->unique()->values();
+            $rts = $wilayahs->getCollection()->pluck('rt')->filter()->unique()->values();
+            $rws = $wilayahs->getCollection()->pluck('rw')->filter()->unique()->values();
+            $dasawismas = $wilayahs->getCollection()->pluck('dasawisma')->filter()->unique()->values();
+
+            $penggunaCountMap = Warga::query()
+                ->selectRaw('kecamatan, kelurahan, rt, rw, dasawisma, COUNT(*) as cnt')
+                ->when($kecamatans->count(), fn ($q) => $q->whereIn('kecamatan', $kecamatans))
+                ->when($kelurahans->count(), fn ($q) => $q->whereIn('kelurahan', $kelurahans))
+                ->when($rts->count(), fn ($q) => $q->whereIn('rt', $rts))
+                ->when($rws->count(), fn ($q) => $q->whereIn('rw', $rws))
+                ->when($dasawismas->count(), fn ($q) => $q->whereIn('dasawisma', $dasawismas))
+                ->groupBy('kecamatan', 'kelurahan', 'rt', 'rw', 'dasawisma')
+                ->get()
+                ->mapWithKeys(function ($row) {
+                    $key = implode('|', [
+                        $row->kecamatan,
+                        $row->kelurahan,
+                        $row->rt,
+                        $row->rw,
+                        $row->dasawisma,
+                    ]);
+
+                    return [$key => (int) $row->cnt];
+                })
+                ->all();
+
+            $penggunaWargaMap = Warga::query()
+                ->select(['nama_lengkap', 'nik', 'kecamatan', 'kelurahan', 'rt', 'rw', 'dasawisma'])
+                ->when($kecamatans->count(), fn ($q) => $q->whereIn('kecamatan', $kecamatans))
+                ->when($kelurahans->count(), fn ($q) => $q->whereIn('kelurahan', $kelurahans))
+                ->when($rts->count(), fn ($q) => $q->whereIn('rt', $rts))
+                ->when($rws->count(), fn ($q) => $q->whereIn('rw', $rws))
+                ->when($dasawismas->count(), fn ($q) => $q->whereIn('dasawisma', $dasawismas))
+                ->orderBy('nama_lengkap')
+                ->get()
+                ->groupBy(fn (Warga $w) => implode('|', [$w->kecamatan, $w->kelurahan, $w->rt, $w->rw, $w->dasawisma]))
+                ->all();
         }
 
         return view('wilayah.index', compact(
@@ -87,7 +129,9 @@ class WilayahController extends Controller
             'selectedDasawisma',
             'wargasDasawisma',
             'perpindahansDasawisma',
-            'users'
+            'users',
+            'penggunaCountMap',
+            'penggunaWargaMap'
         ));
     }
 

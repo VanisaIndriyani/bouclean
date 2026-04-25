@@ -57,7 +57,7 @@
                     @enderror
                 </div>
                 <div class="col-md-4">
-                    <label class="form-label">TBC Mangkir</label>
+                    <label class="form-label">TBC Tidak Berobat/Mangkir</label>
                     <select class="form-select @error('tbc_mangkir') is-invalid @enderror" name="tbc_mangkir">
                         <option value="0" {{ old('tbc_mangkir', (int) $kesehatan->tbc_mangkir) == 0 ? 'selected' : '' }}>Tidak</option>
                         <option value="1" {{ old('tbc_mangkir', (int) $kesehatan->tbc_mangkir) == 1 ? 'selected' : '' }}>Ya</option>

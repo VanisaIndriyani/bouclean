@@ -53,18 +53,6 @@
             </div>
         </form>
 
-        @if($view !== 'dasawisma')
-            <div class="mb-4">
-                <div class="text-muted small fw-semibold mb-2">PENGGUNA</div>
-                <button type="button" class="btn p-0 border-0 bg-transparent" data-bs-toggle="modal" data-bs-target="#usersModal">
-                    <div class="d-inline-flex align-items-center justify-content-center rounded-3 bg-primary bg-opacity-10 text-primary"
-                         style="width: 64px; height: 64px; font-size: 22px; font-weight: 700;">
-                        {{ $users->count() }}
-                    </div>
-                </button>
-            </div>
-        @endif
-
         <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-2 mb-2">
             <div class="text-muted small">
                 Menampilkan {{ $wilayahs->firstItem() ?? 0 }} - {{ $wilayahs->lastItem() ?? 0 }} dari {{ $wilayahs->total() }} data
@@ -78,12 +66,15 @@
                         <th width="50">No</th>
                         <th>Kecamatan</th>
                         <th>Kelurahan</th>
-                        <th>RT</th>
                         <th>RW</th>
+                        <th>RT</th>
                         @if($view === 'dasawisma')
                             <th>Dasawisma</th>
+                            <th>Nama Pengguna</th>
+                        @else
+                            <th>Nama</th>
+                            <th>Pengguna</th>
                         @endif
-                        <th>Nama Pengguna</th>
                         <th width="120" class="text-nowrap">Actions</th>
                     </tr>
                 </thead>
@@ -93,12 +84,46 @@
                         <td class="text-center">{{ $wilayahs->firstItem() + $index }}</td>
                         <td>{{ $wilayah->kecamatan }}</td>
                         <td>{{ $wilayah->kelurahan }}</td>
-                        <td>{{ $wilayah->rt }}</td>
                         <td>{{ $wilayah->rw }}</td>
+                        <td>{{ $wilayah->rt }}</td>
                         @if($view === 'dasawisma')
                             <td>{{ $wilayah->dasawisma }}</td>
+                            <td>{{ $wilayah->nama_pengguna }}</td>
+                        @else
+                            <td>
+                                @php
+                                    $namaDasawisma = trim((string) $wilayah->dasawisma);
+                                    $dasawismaNama = $namaDasawisma;
+                                    $dasawismaNo = null;
+                                    if (preg_match('/^(.*)\s+(\d+)$/', $namaDasawisma, $m)) {
+                                        $dasawismaNama = trim($m[1]);
+                                        $dasawismaNo = $m[2];
+                                    }
+                                @endphp
+                                <div class="fw-semibold text-uppercase">{{ $dasawismaNama }}</div>
+                                @if($dasawismaNo !== null)
+                                    <div class="text-muted small">{{ $dasawismaNo }}</div>
+                                @endif
+                            </td>
+                            <td>
+                                @php
+                                    $countKey = implode('|', [
+                                        $wilayah->kecamatan,
+                                        $wilayah->kelurahan,
+                                        $wilayah->rt,
+                                        $wilayah->rw,
+                                        $wilayah->dasawisma,
+                                    ]);
+                                    $penggunaCount = $penggunaCountMap[$countKey] ?? 0;
+                                @endphp
+                                <button type="button" class="btn p-0 border-0 bg-transparent" data-bs-toggle="modal" data-bs-target="#penggunaWilayahModal{{ $wilayah->id }}">
+                                    <div class="d-inline-flex align-items-center justify-content-center rounded-3 bg-primary text-white"
+                                         style="width: 44px; height: 32px; font-weight: 700;">
+                                        {{ $penggunaCount }}
+                                    </div>
+                                </button>
+                            </td>
                         @endif
-                        <td>{{ $wilayah->nama_pengguna }}</td>
                         <td class="text-nowrap">
                             <div class="d-flex flex-nowrap gap-1">
                                 @if(Auth::user()->role === 'admin')
@@ -120,7 +145,7 @@
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="{{ $view === 'dasawisma' ? '8' : '7' }}" class="text-center py-4">
+                        <td colspan="8" class="text-center py-4">
                             <div class="text-muted">
                                 <i class="bi bi-inbox fs-1 d-block mb-2"></i>
                                 <strong>Belum ada data wilayah</strong>
@@ -135,6 +160,68 @@
         <div class="mt-4">
             {{ $wilayahs->withQueryString()->links() }}
         </div>
+
+        @if($view !== 'dasawisma')
+            @foreach($wilayahs as $wilayah)
+                @php
+                    $namaDasawisma = trim((string) $wilayah->dasawisma);
+                    $dasawismaNama = $namaDasawisma;
+                    $dasawismaNo = null;
+                    if (preg_match('/^(.*)\s+(\d+)$/', $namaDasawisma, $m)) {
+                        $dasawismaNama = trim($m[1]);
+                        $dasawismaNo = $m[2];
+                    }
+
+                    $countKey = implode('|', [
+                        $wilayah->kecamatan,
+                        $wilayah->kelurahan,
+                        $wilayah->rt,
+                        $wilayah->rw,
+                        $wilayah->dasawisma,
+                    ]);
+                    $penggunaCount = $penggunaCountMap[$countKey] ?? 0;
+                @endphp
+                <div class="modal fade" id="penggunaWilayahModal{{ $wilayah->id }}" tabindex="-1" aria-hidden="true">
+                    <div class="modal-dialog modal-dialog-centered">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title">Pengguna</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                            </div>
+                            <div class="modal-body">
+                                <div class="table-responsive">
+                                    <table class="table table-hover align-middle text-nowrap mb-0">
+                                        <thead class="table-light">
+                                            <tr>
+                                                <th width="60">No</th>
+                                                <th>Nama Pengguna</th>
+                                                <th>NIK</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @php
+                                                $wargaList = $penggunaWargaMap[$countKey] ?? collect();
+                                            @endphp
+                                            @forelse($wargaList as $i => $w)
+                                                <tr>
+                                                    <td class="text-center">{{ $i + 1 }}</td>
+                                                    <td class="fw-semibold">{{ $w->nama_lengkap }}</td>
+                                                    <td class="text-muted">{{ $w->nik_masked }}</td>
+                                                </tr>
+                                            @empty
+                                                <tr>
+                                                    <td colspan="3" class="text-center text-muted py-3">Belum ada data pengguna</td>
+                                                </tr>
+                                            @endforelse
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            @endforeach
+        @endif
 
         @if($view === 'dasawisma')
             <div class="mt-5">
@@ -220,7 +307,12 @@
         <div class="modal-dialog modal-xl modal-dialog-centered">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title">Pengguna</h5>
+                    <h5 class="modal-title d-flex align-items-center gap-2">
+                        Pengguna
+                        <span class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-25">
+                            {{ $users->count() }}
+                        </span>
+                    </h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">

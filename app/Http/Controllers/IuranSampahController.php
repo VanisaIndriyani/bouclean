@@ -46,11 +46,10 @@ class IuranSampahController extends Controller
 
     public function create()
     {
-        $wargas = Warga::orderBy('nama_lengkap')->get();
         $bulanList = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
         $tahunList = range(date('Y'), date('Y') - 5);
 
-        return view('iuran-sampah.create', compact('wargas', 'bulanList', 'tahunList'));
+        return view('iuran-sampah.create', compact('bulanList', 'tahunList'));
     }
 
     public function store(Request $request)
@@ -78,7 +77,7 @@ class IuranSampahController extends Controller
         }
 
         $validated = $request->validate([
-            'warga_id' => 'required|exists:wargas,id',
+            'nik' => 'required|string|size:16|exists:wargas,nik',
             'bulan' => 'required|in:Januari,Februari,Maret,April,Mei,Juni,Juli,Agustus,September,Oktober,November,Desember',
             'tahun' => 'required|integer|min:2020|max:2100',
             'nominal' => 'required|numeric|min:0',
@@ -87,6 +86,8 @@ class IuranSampahController extends Controller
             'petugas' => 'nullable|string|max:255',
         ]);
 
+        $validated['warga_id'] = Warga::query()->where('nik', $validated['nik'])->value('id');
+        unset($validated['nik']);
         $validated['user_id'] = Auth::id();
 
         if ($validated['status'] === 'lunas' && ! $request->has('tanggal_bayar')) {
@@ -100,12 +101,11 @@ class IuranSampahController extends Controller
 
     public function edit(IuranSampah $iuran_sampah)
     {
-        $wargas = Warga::orderBy('nama_lengkap')->get();
         $bulanList = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
         $tahunList = range(date('Y'), date('Y') - 5);
         $iuranSampah = $iuran_sampah;
 
-        return view('iuran-sampah.edit', compact('iuranSampah', 'wargas', 'bulanList', 'tahunList'));
+        return view('iuran-sampah.edit', compact('iuranSampah', 'bulanList', 'tahunList'));
     }
 
     public function update(Request $request, IuranSampah $iuran_sampah)
@@ -135,7 +135,7 @@ class IuranSampahController extends Controller
         }
 
         $validated = $request->validate([
-            'warga_id' => 'required|exists:wargas,id',
+            'nik' => 'required|string|size:16|exists:wargas,nik',
             'bulan' => 'required|in:Januari,Februari,Maret,April,Mei,Juni,Juli,Agustus,September,Oktober,November,Desember',
             'tahun' => 'required|integer|min:2020|max:2100',
             'nominal' => 'required|numeric|min:0',
@@ -144,6 +144,8 @@ class IuranSampahController extends Controller
             'petugas' => 'nullable|string|max:255',
         ]);
 
+        $validated['warga_id'] = Warga::query()->where('nik', $validated['nik'])->value('id');
+        unset($validated['nik']);
         $iuranSampah->update($validated);
 
         return redirect()->route('iuran-sampah.index')->with('success', 'Data iuran sampah berhasil diperbarui.');

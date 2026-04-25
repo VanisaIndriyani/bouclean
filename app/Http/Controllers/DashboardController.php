@@ -10,9 +10,6 @@ use App\Models\Warga;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
-use Maatwebsite\Excel\Concerns\FromArray;
-use Maatwebsite\Excel\Concerns\WithHeadings;
-use Maatwebsite\Excel\Facades\Excel;
 
 class DashboardController extends Controller
 {
@@ -125,32 +122,34 @@ class DashboardController extends Controller
 
         $stats = $this->monthlyStatsForYear($selectedYear);
 
-        $rows = [];
-        foreach ($stats['labels'] as $idx => $label) {
-            $rows[] = [
-                $label,
-                $stats['sampahData'][$idx] ?? 0,
-                $stats['iuranData'][$idx] ?? 0,
-            ];
-        }
+        $filename = 'statistik-bulanan-'.$selectedYear.'.xls';
 
-        $export = new class($rows) implements FromArray, WithHeadings
-        {
-            public function __construct(private readonly array $rows) {}
+        $escape = static fn ($value) => htmlspecialchars((string) $value, ENT_QUOTES, 'UTF-8');
 
-            public function array(): array
-            {
-                return $this->rows;
+        return response()->streamDownload(function () use ($stats, $escape) {
+            echo "\xEF\xBB\xBF";
+            echo '<table border="1">';
+            echo '<thead><tr>';
+            echo '<th>'.$escape('Bulan').'</th>';
+            echo '<th>'.$escape('Sampah (Kg)').'</th>';
+            echo '<th>'.$escape('Iuran Lunas (Rp)').'</th>';
+            echo '</tr></thead>';
+            echo '<tbody>';
+
+            foreach ($stats['labels'] as $idx => $label) {
+                $sampah = $stats['sampahData'][$idx] ?? 0;
+                $iuran = $stats['iuranData'][$idx] ?? 0;
+
+                echo '<tr>';
+                echo '<td>'.$escape($label).'</td>';
+                echo '<td>'.$escape($sampah).'</td>';
+                echo '<td>'.$escape($iuran).'</td>';
+                echo '</tr>';
             }
 
-            public function headings(): array
-            {
-                return ['Bulan', 'Sampah (Kg)', 'Iuran Lunas (Rp)'];
-            }
-        };
-
-        $filename = 'statistik-bulanan-'.$selectedYear.'.xlsx';
-
-        return Excel::download($export, $filename);
+            echo '</tbody></table>';
+        }, $filename, [
+            'Content-Type' => 'application/vnd.ms-excel; charset=UTF-8',
+        ]);
     }
 }
