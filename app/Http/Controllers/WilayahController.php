@@ -89,6 +89,8 @@ class WilayahController extends Controller
 
             $penggunaCountMap = Warga::query()
                 ->selectRaw('kecamatan, kelurahan, rt, rw, dasawisma, COUNT(*) as cnt')
+                ->whereNotNull('account_user_id')
+                ->whereHas('accountUser', fn ($q) => $q->whereNotNull('last_login_at'))
                 ->when($kecamatans->count(), fn ($q) => $q->whereIn('kecamatan', $kecamatans))
                 ->when($kelurahans->count(), fn ($q) => $q->whereIn('kelurahan', $kelurahans))
                 ->when($rts->count(), fn ($q) => $q->whereIn('rt', $rts))
@@ -110,7 +112,10 @@ class WilayahController extends Controller
                 ->all();
 
             $penggunaWargaMap = Warga::query()
-                ->select(['id', 'nama_lengkap', 'nik', 'kecamatan', 'kelurahan', 'rt', 'rw', 'dasawisma', 'updated_at'])
+                ->select(['id', 'nama_lengkap', 'nik', 'kecamatan', 'kelurahan', 'rt', 'rw', 'dasawisma', 'account_user_id'])
+                ->with(['accountUser:id,email,last_login_at'])
+                ->whereNotNull('account_user_id')
+                ->whereHas('accountUser', fn ($q) => $q->whereNotNull('last_login_at'))
                 ->when($kecamatans->count(), fn ($q) => $q->whereIn('kecamatan', $kecamatans))
                 ->when($kelurahans->count(), fn ($q) => $q->whereIn('kelurahan', $kelurahans))
                 ->when($rts->count(), fn ($q) => $q->whereIn('rt', $rts))

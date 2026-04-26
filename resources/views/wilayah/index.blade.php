@@ -208,10 +208,10 @@
                                                 <tr>
                                                     <td class="text-center">{{ $i + 1 }}</td>
                                                     <td class="fw-semibold">{{ $w->nama_lengkap }}</td>
-                                                    <td class="text-muted">{{ $w->nik_masked }}</td>
+                                                    <td class="text-muted">{{ $w->accountUser?->email ?? '-' }}</td>
                                                     <td>
-                                                        @if($w->updated_at)
-                                                            {{ $w->updated_at->format('d/m/Y H:i') }}
+                                                        @if($w->accountUser?->last_login_at)
+                                                            {{ $w->accountUser->last_login_at->format('d/m/Y H:i') }}
                                                         @else
                                                             <span class="text-muted">-</span>
                                                         @endif

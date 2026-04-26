@@ -24,7 +24,7 @@ Route::get('/register', [AuthController::class, 'showRegisterForm'])->name('regi
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
-Route::middleware(['auth', 'role:admin,user'])->group(function () {
+Route::middleware(['auth', 'role:admin,user,warga'])->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
     Route::get('/dashboard/statistik.xlsx', [DashboardController::class, 'exportMonthlyExcel'])->name('dashboard.export');
 
@@ -34,6 +34,7 @@ Route::middleware(['auth', 'role:admin,user'])->group(function () {
 
     // Fitur yang bisa diakses Admin & User
     Route::resource('warga', WargaController::class)->except(['show', 'destroy']);
+    Route::get('warga/lookup', [WargaController::class, 'lookup'])->name('warga.lookup');
     Route::get('warga/{warga}/kesehatan', [KesehatanWargaController::class, 'index'])->name('warga.kesehatan.index');
     Route::get('warga/{warga}/kesehatan/create', [KesehatanWargaController::class, 'create'])->name('warga.kesehatan.create');
     Route::post('warga/{warga}/kesehatan', [KesehatanWargaController::class, 'store'])->name('warga.kesehatan.store');

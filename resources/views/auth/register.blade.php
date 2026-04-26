@@ -22,6 +22,19 @@
                             @csrf
 
                             <div class="mb-3">
+                                <label class="form-label">NIK</label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-white">
+                                        <i class="bi bi-card-text text-muted"></i>
+                                    </span>
+                                    <input type="text" class="form-control @error('nik') is-invalid @enderror" name="nik" value="{{ old('nik') }}" required maxlength="16" placeholder="Masukkan NIK 16 digit">
+                                    @error('nik')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
                                 <label class="form-label">Nama Lengkap</label>
                                 <div class="input-group">
                                     <span class="input-group-text bg-white">

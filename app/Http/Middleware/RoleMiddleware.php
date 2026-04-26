@@ -20,12 +20,19 @@ class RoleMiddleware
             }
         }
 
-        if (! $request->user() || ! in_array($request->user()->role, $allowedRoles)) {
+        $allowedRoles = array_values(array_filter(array_map(static fn ($r) => trim((string) $r), $allowedRoles)));
+        $userRole = $request->user() ? trim((string) $request->user()->role) : null;
+
+        if (! $request->user() || ! in_array($userRole, $allowedRoles, true)) {
             if ($request->expectsJson()) {
                 return response()->json(['message' => 'Unauthorized'], 403);
             }
 
-            return redirect()->route('dashboard')->with('error', 'Anda tidak memiliki akses ke halaman tersebut.');
+            if ($request->user() && in_array($request->user()->role, ['admin', 'user', 'warga'])) {
+                return redirect()->route('dashboard')->with('error', 'Anda tidak memiliki akses ke halaman tersebut.');
+            }
+
+            return redirect('/')->with('error', 'Anda tidak memiliki akses ke halaman tersebut.');
         }
 
         return $next($request);

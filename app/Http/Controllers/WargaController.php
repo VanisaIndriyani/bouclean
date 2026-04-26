@@ -9,6 +9,38 @@ use Illuminate\Support\Facades\Auth;
 
 class WargaController extends Controller
 {
+    public function lookup(Request $request)
+    {
+        $q = trim((string) $request->query('q', ''));
+        if ($q === '') {
+            return response()->json([]);
+        }
+
+        $digits = preg_replace('/\D+/', '', $q) ?? '';
+
+        $rows = Warga::query()
+            ->select(['id', 'nama_lengkap', 'nik'])
+            ->where(function ($w) use ($q, $digits) {
+                $w->where('nama_lengkap', 'like', "%{$q}%");
+
+                if ($digits !== '') {
+                    $w->orWhere('nik', 'like', "%{$digits}%");
+                } else {
+                    $w->orWhere('nik', 'like', "%{$q}%");
+                }
+            })
+            ->orderBy('nama_lengkap')
+            ->limit(10)
+            ->get()
+            ->map(fn (Warga $w) => [
+                'id' => $w->id,
+                'value' => $w->nama_lengkap.' ('.$w->nik.')',
+            ])
+            ->values();
+
+        return response()->json($rows);
+    }
+
     public function index(Request $request)
     {
         $query = Warga::with('user');

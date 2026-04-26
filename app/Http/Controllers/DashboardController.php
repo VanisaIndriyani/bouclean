@@ -32,10 +32,10 @@ class DashboardController extends Controller
             ->all();
 
         $iuranYears = IuranSampah::query()
-            ->selectRaw("$expr as y")
-            ->whereNotNull('created_at')
+            ->select(['tahun'])
+            ->whereNotNull('tahun')
             ->distinct()
-            ->pluck('y')
+            ->pluck('tahun')
             ->map(fn ($y) => (int) $y)
             ->all();
 
@@ -59,6 +59,20 @@ class DashboardController extends Controller
 
         // Data untuk Grafik Bulanan (Januari - Desember)
         $labels = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Ags', 'Sep', 'Okt', 'Nov', 'Des'];
+        $bulanMap = [
+            1 => 'Januari',
+            2 => 'Februari',
+            3 => 'Maret',
+            4 => 'April',
+            5 => 'Mei',
+            6 => 'Juni',
+            7 => 'Juli',
+            8 => 'Agustus',
+            9 => 'September',
+            10 => 'Oktober',
+            11 => 'November',
+            12 => 'Desember',
+        ];
 
         $sampahData = [];
         $iuranData = [];
@@ -68,8 +82,8 @@ class DashboardController extends Controller
                 ->whereYear('created_at', $year)
                 ->sum('berat') / 1000;
 
-            $iuranData[] = IuranSampah::whereMonth('created_at', $i)
-                ->whereYear('created_at', $year)
+            $iuranData[] = IuranSampah::where('tahun', $year)
+                ->where('bulan', $bulanMap[$i])
                 ->where('status', 'lunas')
                 ->sum('nominal');
         }

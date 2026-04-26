@@ -19,7 +19,8 @@
             <div class="row g-4">
                 <div class="col-md-6">
                     <label class="form-label">Warga <span class="text-danger">*</span></label>
-                    <input type="text" class="form-control @error('warga_nik') is-invalid @enderror" name="warga_nik" value="{{ old('warga_nik', $perpindahan->warga?->nik) }}" maxlength="16" required>
+                    <input type="text" class="form-control @error('warga_nik') is-invalid @enderror" id="perpindahanNikInput" name="warga_nik" value="{{ old('warga_nik', $perpindahan->warga ? ($perpindahan->warga->nama_lengkap.' ('.$perpindahan->warga->nik.')') : '') }}" list="wargaNikList" autocomplete="off" required placeholder="Ketik nama atau NIK, contoh: Anen (3374...)">
+                    <datalist id="wargaNikList"></datalist>
                     @error('warga_nik')
                         <div class="invalid-feedback">{{ $message }}</div>
                     @enderror
@@ -84,3 +85,49 @@
     </div>
 </div>
 @endsection
+
+@push('scripts')
+<script>
+    (function() {
+        const input = document.getElementById('perpindahanNikInput');
+        const list = document.getElementById('wargaNikList');
+        if (!input || !list) return;
+
+        const endpoint = @json(route('warga.lookup'));
+        let timer = null;
+
+        function escapeHtml(value) {
+            return String(value)
+                .replaceAll('&', '&amp;')
+                .replaceAll('<', '&lt;')
+                .replaceAll('>', '&gt;')
+                .replaceAll('"', '&quot;')
+                .replaceAll("'", '&#039;');
+        }
+
+        async function fetchOptions(q) {
+            const res = await fetch(`${endpoint}?q=${encodeURIComponent(q)}`, {
+                headers: { 'Accept': 'application/json' }
+            });
+            if (!res.ok) return [];
+            const data = await res.json();
+            return Array.isArray(data) ? data : [];
+        }
+
+        input.addEventListener('input', function() {
+            const q = input.value.trim();
+            if (timer) clearTimeout(timer);
+            timer = setTimeout(async () => {
+                if (q.length < 2) {
+                    list.innerHTML = '';
+                    return;
+                }
+                const options = await fetchOptions(q);
+                list.innerHTML = options
+                    .map(o => `<option value="${escapeHtml(o.value ?? '')}"></option>`)
+                    .join('');
+            }, 250);
+        });
+    })();
+</script>
+@endpush

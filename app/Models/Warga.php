@@ -51,6 +51,7 @@ class Warga extends Model
         'status',
         'ajukan_perpindahan',
         'user_id',
+        'account_user_id',
     ];
 
     protected $casts = [
@@ -90,6 +91,11 @@ class Warga extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function accountUser(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'account_user_id');
     }
 
     public function perpindahans(): HasMany

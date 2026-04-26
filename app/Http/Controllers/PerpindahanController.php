@@ -53,13 +53,18 @@ class PerpindahanController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'warga_nik' => 'required|string|size:16',
+            'warga_nik' => 'required|string',
             'asal' => 'required|string|max:255',
             'tujuan' => 'required|string|max:255',
             'diusulkan_oleh' => 'required|string|max:255',
         ]);
 
         $nik = $this->normalizeNik($validated['warga_nik']);
+        if (strlen($nik) !== 16) {
+            return back()
+                ->withErrors(['warga_nik' => 'NIK harus 16 digit.'])
+                ->withInput();
+        }
         $warga = Warga::query()->where('nik', $nik)->first();
         if (! $warga) {
             return back()
@@ -86,7 +91,7 @@ class PerpindahanController extends Controller
     public function update(Request $request, Perpindahan $perpindahan)
     {
         $validated = $request->validate([
-            'warga_nik' => 'required|string|size:16',
+            'warga_nik' => 'required|string',
             'asal' => 'required|string|max:255',
             'tujuan' => 'required|string|max:255',
             'diusulkan_oleh' => 'required|string|max:255',
@@ -95,6 +100,11 @@ class PerpindahanController extends Controller
         ]);
 
         $nik = $this->normalizeNik($validated['warga_nik']);
+        if (strlen($nik) !== 16) {
+            return back()
+                ->withErrors(['warga_nik' => 'NIK harus 16 digit.'])
+                ->withInput();
+        }
         $warga = Warga::query()->where('nik', $nik)->first();
         if (! $warga) {
             return back()

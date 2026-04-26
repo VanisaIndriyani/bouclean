@@ -7,6 +7,7 @@ use App\Models\IuranSampah;
 use App\Models\Perpindahan;
 use App\Models\User;
 use App\Models\Warga;
+use App\Models\Wilayah;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
@@ -39,6 +40,83 @@ class DatabaseSeeder extends Seeder
 
         $admin = User::query()->where('email', 'admin@bouclear.com')->first();
         $adminId = $admin?->id ?? 1;
+
+        if (Wilayah::query()->count() === 0) {
+            $wilayahRows = [
+                [
+                    'kecamatan' => 'Semarang Utara',
+                    'kelurahan' => 'Plombokan',
+                    'rt' => '005',
+                    'rw' => '003',
+                    'dasawisma' => 'Dahlia 4',
+                    'nama_pengguna' => 'RW III RT 5 _DAHLIA 4',
+                ],
+                [
+                    'kecamatan' => 'Semarang Utara',
+                    'kelurahan' => 'Plombokan',
+                    'rt' => '001',
+                    'rw' => '002',
+                    'dasawisma' => 'Bougenville 1',
+                    'nama_pengguna' => 'BOUGENVILLE 1',
+                ],
+                [
+                    'kecamatan' => 'Semarang Utara',
+                    'kelurahan' => 'Plombokan',
+                    'rt' => '002',
+                    'rw' => '002',
+                    'dasawisma' => 'Bougenville 2',
+                    'nama_pengguna' => 'BOUGENVILLE 2',
+                ],
+                [
+                    'kecamatan' => 'Semarang Utara',
+                    'kelurahan' => 'Plombokan',
+                    'rt' => '003',
+                    'rw' => '002',
+                    'dasawisma' => 'Bougenville 3',
+                    'nama_pengguna' => 'BOUGENVILLE 3',
+                ],
+                [
+                    'kecamatan' => 'Semarang Utara',
+                    'kelurahan' => 'Plombokan',
+                    'rt' => '004',
+                    'rw' => '002',
+                    'dasawisma' => 'Bougenville 4',
+                    'nama_pengguna' => 'BOUGENVILLE 4',
+                ],
+            ];
+
+            foreach ($wilayahRows as $row) {
+                Wilayah::query()->create($row);
+
+                $warga = Warga::query()
+                    ->where('kecamatan', $row['kecamatan'])
+                    ->where('kelurahan', $row['kelurahan'])
+                    ->where('rt', $row['rt'])
+                    ->where('rw', $row['rw'])
+                    ->where('dasawisma', $row['dasawisma'])
+                    ->whereNotNull('account_user_id')
+                    ->first();
+
+                if (! $warga) {
+                    $wargaUser = User::factory()->create([
+                        'name' => 'Warga '.$row['dasawisma'],
+                        'email' => strtolower(str_replace(' ', '_', $row['dasawisma'])).'_'.$row['rt'].$row['rw'].'@example.com',
+                        'role' => 'warga',
+                        'last_login_at' => now(),
+                    ]);
+
+                    $warga = Warga::factory()->state([
+                        'user_id' => $adminId,
+                        'kecamatan' => $row['kecamatan'],
+                        'kelurahan' => $row['kelurahan'],
+                        'rt' => $row['rt'],
+                        'rw' => $row['rw'],
+                        'dasawisma' => $row['dasawisma'],
+                        'account_user_id' => $wargaUser->id,
+                    ])->create();
+                }
+            }
+        }
 
         if (Warga::query()->count() < 10) {
             $need = 10 - Warga::query()->count();
