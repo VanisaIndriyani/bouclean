@@ -54,6 +54,7 @@ Route::middleware(['auth', 'role:admin,user'])->group(function () {
 
         Route::resource('wilayah', WilayahController::class)->except(['show', 'index']);
         Route::resource('users', UserController::class)->only(['update', 'destroy']);
+        Route::get('contact-messages', [ContactMessageController::class, 'index'])->name('contact-messages.index');
         Route::post('contact-messages/{contactMessage}/read', [ContactMessageController::class, 'markRead'])->name('contact-messages.read');
 
         Route::post('/perpindahan/{perpindahan}/approve', [PerpindahanController::class, 'approve'])->name('perpindahan.approve');

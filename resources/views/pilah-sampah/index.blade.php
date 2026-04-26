@@ -40,11 +40,16 @@
         </div>
 
         <div class="table-responsive overflow-auto">
-            <table class="table table-hover align-middle text-nowrap" style="min-width: 900px;">
+            <table class="table table-hover align-middle text-nowrap" style="min-width: 1400px;">
                 <thead>
                     <tr>
                         <th width="50">No</th>
-                        <th>KK</th>
+                        <th>Kecamatan</th>
+                        <th>Kelurahan</th>
+                        <th>RT</th>
+                        <th>RW</th>
+                        <th>Dasawisma</th>
+                        <th>Kepala Keluarga</th>
                         <th>Jenis Sampah</th>
                         <th>Berat (gr)</th>
                         <th>Sedekah</th>
@@ -57,9 +62,14 @@
                     @forelse($pilahSampahs as $index => $pilah)
                     <tr>
                         <td class="text-center">{{ $pilahSampahs->firstItem() + $index }}</td>
+                        <td>{{ $pilah->kecamatan ?: ($pilah->warga?->kecamatan ?: '-') }}</td>
+                        <td>{{ $pilah->kelurahan ?: ($pilah->warga?->kelurahan ?: '-') }}</td>
+                        <td>{{ $pilah->rt ?: ($pilah->warga?->rt ?: '-') }}</td>
+                        <td>{{ $pilah->rw ?: ($pilah->warga?->rw ?: '-') }}</td>
+                        <td>{{ $pilah->dasawisma ?: ($pilah->warga?->dasawisma ?: '-') }}</td>
                         <td>
-                            <div class="fw-semibold">{{ $pilah->warga->no_kk ?: '-' }}</div>
-                            <div class="text-muted small">{{ $pilah->warga->nama_lengkap }}</div>
+                            <div class="fw-semibold">{{ $pilah->warga?->nama_lengkap ?: '-' }}</div>
+                            <div class="text-muted small">{{ $pilah->warga?->nik_masked ?: '-' }}</div>
                         </td>
                         <td>{{ $pilah->jenis_sampah ?? '-' }}</td>
                         <td>{{ number_format($pilah->berat, 0, ',', '.') }} g</td>
@@ -99,7 +109,7 @@
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="8" class="text-center py-4">
+                        <td colspan="13" class="text-center py-4">
                             <div class="text-muted">
                                 <i class="bi bi-inbox fs-1 d-block mb-2"></i>
                                 <strong>Belum ada data pilah sampah</strong>

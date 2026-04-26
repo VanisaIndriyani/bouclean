@@ -237,8 +237,7 @@
                     <i class="bi bi-speedometer2"></i> Dashboard
                 </a>
             </li>
-           
-
+          
             <li class="nav-item">
                 <div class="nav-header px-4 py-2 text-white-50 small text-uppercase">Data Dasawisma</div>
             </li>
@@ -262,6 +261,11 @@
                     <i class="bi bi-recycle"></i> Pilah Sampah
                 </a>
             </li>
+            <li class="nav-item">
+                <a class="nav-link {{ request()->routeIs('iuran-sampah.*') ? 'active' : '' }}" href="{{ route('iuran-sampah.index') }}">
+                    <i class="bi bi-cash-stack"></i> Iuran Sampah
+                </a>
+            </li>
 
             @if(Auth::user()->role === 'admin')
             @php
@@ -279,12 +283,7 @@
                 <div class="collapse {{ $dataMasterExpanded }}" id="dataMasterMenu">
                     <ul class="nav flex-column ms-4 my-1">
                         <li class="nav-item">
-                            <a class="nav-link py-2 {{ request()->routeIs('wilayah.index') && request('view') !== 'dasawisma' ? 'active' : '' }}" href="{{ route('wilayah.index') }}">
-                                Wilayah Administrasi
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link py-2 {{ request()->routeIs('wilayah.index') && request('view') === 'dasawisma' ? 'active' : '' }}" href="{{ route('wilayah.index', ['view' => 'dasawisma', 'dasawisma' => 'all']) }}">
+                            <a class="nav-link py-2 {{ request()->routeIs('wilayah.index') ? 'active' : '' }}" href="{{ route('wilayah.index') }}">
                                 Dasawisma
                             </a>
                         </li>

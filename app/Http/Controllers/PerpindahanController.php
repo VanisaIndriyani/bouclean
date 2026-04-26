@@ -9,6 +9,11 @@ use Illuminate\Support\Facades\Auth;
 
 class PerpindahanController extends Controller
 {
+    private function normalizeNik(?string $nik): string
+    {
+        return preg_replace('/\D+/', '', (string) $nik) ?? '';
+    }
+
     public function index(Request $request)
     {
         $query = Perpindahan::with(['warga', 'user']);
@@ -42,22 +47,30 @@ class PerpindahanController extends Controller
 
     public function create()
     {
-        $wargas = Warga::orderBy('nama_lengkap')->get();
-
-        return view('perpindahan.create', compact('wargas'));
+        return view('perpindahan.create');
     }
 
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'warga_id' => 'required|exists:wargas,id',
+            'warga_nik' => 'required|string|size:16',
             'asal' => 'required|string|max:255',
             'tujuan' => 'required|string|max:255',
             'diusulkan_oleh' => 'required|string|max:255',
         ]);
 
+        $nik = $this->normalizeNik($validated['warga_nik']);
+        $warga = Warga::query()->where('nik', $nik)->first();
+        if (! $warga) {
+            return back()
+                ->withErrors(['warga_nik' => 'NIK tidak ditemukan.'])
+                ->withInput();
+        }
+
         $validated['user_id'] = Auth::id();
         $validated['status'] = 'pending';
+        $validated['warga_id'] = $warga->id;
+        unset($validated['warga_nik']);
         Perpindahan::create($validated);
 
         return redirect()->route('perpindahan.index')->with('success', 'Pengajuan perpindahan berhasil dikirim.');
@@ -65,15 +78,15 @@ class PerpindahanController extends Controller
 
     public function edit(Perpindahan $perpindahan)
     {
-        $wargas = Warga::orderBy('nama_lengkap')->get();
+        $perpindahan->load('warga');
 
-        return view('perpindahan.edit', compact('perpindahan', 'wargas'));
+        return view('perpindahan.edit', compact('perpindahan'));
     }
 
     public function update(Request $request, Perpindahan $perpindahan)
     {
         $validated = $request->validate([
-            'warga_id' => 'required|exists:wargas,id',
+            'warga_nik' => 'required|string|size:16',
             'asal' => 'required|string|max:255',
             'tujuan' => 'required|string|max:255',
             'diusulkan_oleh' => 'required|string|max:255',
@@ -81,6 +94,16 @@ class PerpindahanController extends Controller
             'tindak_lanjut' => 'nullable|string',
         ]);
 
+        $nik = $this->normalizeNik($validated['warga_nik']);
+        $warga = Warga::query()->where('nik', $nik)->first();
+        if (! $warga) {
+            return back()
+                ->withErrors(['warga_nik' => 'NIK tidak ditemukan.'])
+                ->withInput();
+        }
+
+        $validated['warga_id'] = $warga->id;
+        unset($validated['warga_nik']);
         $perpindahan->update($validated);
 
         return redirect()->route('perpindahan.index')->with('success', 'Data perpindahan berhasil diperbarui.');

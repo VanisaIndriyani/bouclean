@@ -18,15 +18,8 @@
             <div class="row g-4">
                 <div class="col-md-6">
                     <label class="form-label">Warga <span class="text-danger">*</span></label>
-                    <select class="form-select @error('warga_id') is-invalid @enderror" name="warga_id" required>
-                        <option value="">-- Pilih Warga --</option>
-                        @foreach($wargas as $warga)
-                            <option value="{{ $warga->id }}" {{ old('warga_id') == $warga->id ? 'selected' : '' }}>
-                                {{ $warga->nama_lengkap }} - {{ $warga->nik_masked }}
-                            </option>
-                        @endforeach
-                    </select>
-                    @error('warga_id')
+                    <input type="text" class="form-control @error('warga_nik') is-invalid @enderror" name="warga_nik" value="{{ old('warga_nik') }}" maxlength="16" required>
+                    @error('warga_nik')
                         <div class="invalid-feedback">{{ $message }}</div>
                     @enderror
                 </div>

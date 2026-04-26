@@ -97,18 +97,15 @@ class DashboardController extends Controller
         $stats = $this->monthlyStatsForYear($selectedYear);
 
         $contactUnreadCount = 0;
-        $recentContactMessages = collect();
 
         if (Auth::user()->role === 'admin') {
             $contactUnreadCount = ContactMessage::query()->where('is_read', false)->count();
-            $recentContactMessages = ContactMessage::query()->latest()->limit(5)->get();
         }
 
         return view('dashboard', array_merge($stats, [
             'years' => $years,
             'selectedYear' => $selectedYear,
             'contactUnreadCount' => $contactUnreadCount,
-            'recentContactMessages' => $recentContactMessages,
         ]));
     }
 
