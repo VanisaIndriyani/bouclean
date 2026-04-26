@@ -9,7 +9,7 @@
         <p class="mb-0 opacity-75">Kelola data pilah sampah warga</p>
     </div>
     <a href="{{ route('pilah-sampah.create') }}" class="btn btn-primary rounded-pill">
-        <i class="bi bi-plus-lg me-2"></i> Tambah Data
+        <i class="bi bi-plus-lg me-2"></i> Tambah
     </a>
 </div>
 
@@ -40,18 +40,18 @@
         </div>
 
         <div class="table-responsive overflow-auto">
-            <table class="table table-hover align-middle text-nowrap" style="min-width: 1400px;">
+            <table class="table table-hover align-middle text-nowrap" style="min-width: 1100px;">
                 <thead>
                     <tr>
                         <th width="50">No</th>
-                        <th>Kecamatan</th>
-                        <th>Kelurahan</th>
-                        <th>RT</th>
-                        <th>RW</th>
-                        <th>Dasawisma</th>
+                        <th>Bulan</th>
+                        <th>Tahun</th>
                         <th>Kepala Keluarga</th>
                         <th>Jenis Sampah</th>
-                        <th>Berat (gr)</th>
+                        <th class="text-center">
+                            <div class="fw-semibold">BERAT</div>
+                            <div class="text-muted small">(SATUAN GR)</div>
+                        </th>
                         <th>Sedekah</th>
                         <th>Harga</th>
                         <th>Foto</th>
@@ -62,17 +62,31 @@
                     @forelse($pilahSampahs as $index => $pilah)
                     <tr>
                         <td class="text-center">{{ $pilahSampahs->firstItem() + $index }}</td>
-                        <td>{{ $pilah->kecamatan ?: ($pilah->warga?->kecamatan ?: '-') }}</td>
-                        <td>{{ $pilah->kelurahan ?: ($pilah->warga?->kelurahan ?: '-') }}</td>
-                        <td>{{ $pilah->rt ?: ($pilah->warga?->rt ?: '-') }}</td>
-                        <td>{{ $pilah->rw ?: ($pilah->warga?->rw ?: '-') }}</td>
-                        <td>{{ $pilah->dasawisma ?: ($pilah->warga?->dasawisma ?: '-') }}</td>
+                        @php
+                            $bulanMap = [
+                                1 => 'Januari',
+                                2 => 'Februari',
+                                3 => 'Maret',
+                                4 => 'April',
+                                5 => 'Mei',
+                                6 => 'Juni',
+                                7 => 'Juli',
+                                8 => 'Agustus',
+                                9 => 'September',
+                                10 => 'Oktober',
+                                11 => 'November',
+                                12 => 'Desember',
+                            ];
+                            $bulanNo = $pilah->created_at?->month;
+                        @endphp
+                        <td>{{ $bulanMap[$bulanNo] ?? '-' }}</td>
+                        <td>{{ $pilah->created_at?->year ?? '-' }}</td>
                         <td>
                             <div class="fw-semibold">{{ $pilah->warga?->nama_lengkap ?: '-' }}</div>
                             <div class="text-muted small">{{ $pilah->warga?->nik_masked ?: '-' }}</div>
                         </td>
                         <td>{{ $pilah->jenis_sampah ?? '-' }}</td>
-                        <td>{{ number_format($pilah->berat, 0, ',', '.') }} g</td>
+                        <td class="text-center">{{ number_format($pilah->berat, 0, ',', '.') }}</td>
                         <td>
                             @if($pilah->sedekah)
                                 <span class="badge bg-success"><i class="bi bi-check-lg"></i> Ya</span>
@@ -109,7 +123,7 @@
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="13" class="text-center py-4">
+                        <td colspan="10" class="text-center py-4">
                             <div class="text-muted">
                                 <i class="bi bi-inbox fs-1 d-block mb-2"></i>
                                 <strong>Belum ada data pilah sampah</strong>

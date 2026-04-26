@@ -114,15 +114,38 @@
     <div class="col-lg-8">
         <div class="card border-0 shadow-sm overflow-hidden h-100">
             <div class="card-header bg-white border-0 py-3 px-4 d-flex justify-content-between align-items-center">
-                <h6 class="mb-0 fw-bold"><i class="bi bi-graph-up me-2 text-primary"></i>Statistik Bulanan</h6>
+                <h6 class="mb-0 fw-bold"><i class="bi bi-graph-up me-2 text-primary"></i>Statistik Bulanan {{ $selectedYear }}</h6>
+                <div class="d-flex align-items-center gap-2">
+                    <a href="{{ route('dashboard.export', ['year' => $selectedYear]) }}" class="btn btn-sm btn-outline-primary rounded-pill">
+                        <i class="bi bi-download me-2"></i>Excel
+                    </a>
+                    <form method="GET" action="{{ route('dashboard') }}" class="d-flex align-items-center gap-2 mb-0">
+                        <label for="year" class="small text-muted mb-0">Tahun</label>
+                        <select name="year" id="year" class="form-select form-select-sm" style="width: 120px;" onchange="this.form.submit()">
+                            @foreach(($years ?? []) as $y)
+                                <option value="{{ $y }}" {{ (int) $selectedYear === (int) $y ? 'selected' : '' }}>{{ $y }}</option>
+                            @endforeach
+                        </select>
+                    </form>
+                </div>
             </div>
             <div class="card-body p-4">
-                <div class="alert alert-info d-flex align-items-center mb-0" role="alert">
-                    <i class="bi bi-info-circle me-2"></i>
-                    <div class="small">
-                        Statistik bulanan akan ditampilkan di sini. Data pilah sampah dan iuran per bulan.
-                    </div>
+                @php
+                    $hasMonthlyData = collect($sampahData ?? [])->sum() > 0 || collect($iuranData ?? [])->sum() > 0;
+                @endphp
+
+                <div style="height: 320px;">
+                    <canvas id="monthlyStatsChart"></canvas>
                 </div>
+
+                @if(! $hasMonthlyData)
+                    <div class="alert alert-info d-flex align-items-center mt-3 mb-0" role="alert">
+                        <i class="bi bi-info-circle me-2"></i>
+                        <div class="small">
+                            Belum ada data statistik untuk tahun {{ $selectedYear }}.
+                        </div>
+                    </div>
+                @endif
             </div>
         </div>
     </div>
@@ -224,3 +247,108 @@
     </div>
 </div>
 @endsection
+
+@push('scripts')
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+<script>
+    (function () {
+        const el = document.getElementById('monthlyStatsChart');
+        if (!el || !window.Chart) return;
+
+        const labels = @json($labels ?? []);
+        const sampahData = @json(array_map('floatval', $sampahData ?? []));
+        const iuranData = @json(array_map('floatval', $iuranData ?? []));
+
+        const ctx = el.getContext('2d');
+
+        new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels,
+                datasets: [
+                    {
+                        type: 'bar',
+                        label: 'Sampah (Kg)',
+                        data: sampahData,
+                        backgroundColor: 'rgba(13, 202, 240, 0.45)',
+                        borderColor: 'rgba(13, 202, 240, 1)',
+                        borderWidth: 1,
+                        yAxisID: 'ySampah',
+                        borderRadius: 6,
+                    },
+                    {
+                        type: 'line',
+                        label: 'Iuran (Rp)',
+                        data: iuranData,
+                        borderColor: 'rgba(25, 135, 84, 1)',
+                        backgroundColor: 'rgba(25, 135, 84, 0.15)',
+                        pointRadius: 3,
+                        pointHoverRadius: 5,
+                        tension: 0.35,
+                        yAxisID: 'yIuran',
+                    },
+                ],
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                interaction: {
+                    mode: 'index',
+                    intersect: false,
+                },
+                plugins: {
+                    legend: {
+                        position: 'top',
+                        labels: {
+                            usePointStyle: true,
+                        },
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function (ctx) {
+                                const label = ctx.dataset.label || '';
+                                const val = ctx.parsed.y ?? 0;
+                                if (ctx.dataset.yAxisID === 'yIuran') {
+                                    return `${label}: Rp ${Number(val).toLocaleString('id-ID')}`;
+                                }
+                                return `${label}: ${Number(val).toLocaleString('id-ID', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} Kg`;
+                            },
+                        },
+                    },
+                },
+                scales: {
+                    ySampah: {
+                        position: 'left',
+                        title: {
+                            display: true,
+                            text: 'Berat Sampah (Kg)',
+                        },
+                        beginAtZero: true,
+                    },
+                    yIuran: {
+                        position: 'right',
+                        grid: {
+                            drawOnChartArea: false,
+                        },
+                        title: {
+                            display: true,
+                            text: 'Total Iuran (Rp)',
+                        },
+                        beginAtZero: true,
+                        ticks: {
+                            callback: function (value) {
+                                return Number(value).toLocaleString('id-ID');
+                            },
+                        },
+                    },
+                    x: {
+                        grid: {
+                            display: false,
+                        },
+                    },
+                },
+            },
+        });
+    })();
+</script>
+@endpush
