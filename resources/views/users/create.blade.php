@@ -123,11 +123,27 @@
                         </div>
                         <div class="col-md-6">
                             <label class="form-label">Dasawisma</label>
-                            <select class="form-select @error('dasawisma') is-invalid @enderror" name="dasawisma[]" multiple required style="min-height: 120px;">
-                                @foreach(($dasawismaOptions ?? collect()) as $opt)
-                                    <option value="{{ $opt }}" {{ in_array($opt, (array) old('dasawisma', []), true) ? 'selected' : '' }}>{{ $opt }}</option>
-                                @endforeach
-                            </select>
+                            @php
+                                $dasawismaInvalid = $errors->has('dasawisma') || $errors->has('dasawisma.*');
+                                $oldDasawisma = (array) old('dasawisma', []);
+                            @endphp
+                            <div class="border rounded p-2 {{ $dasawismaInvalid ? 'border-danger' : '' }}" style="max-height: 140px; overflow: auto;">
+                                @forelse(($dasawismaOptions ?? collect()) as $opt)
+                                    <div class="form-check">
+                                        <input
+                                            class="form-check-input {{ $dasawismaInvalid ? 'is-invalid' : '' }}"
+                                            type="checkbox"
+                                            name="dasawisma[]"
+                                            id="createDasawisma{{ $loop->index }}"
+                                            value="{{ $opt }}"
+                                            {{ in_array($opt, $oldDasawisma, true) ? 'checked' : '' }}
+                                        >
+                                        <label class="form-check-label" for="createDasawisma{{ $loop->index }}">{{ $opt }}</label>
+                                    </div>
+                                @empty
+                                    <div class="text-muted small">Belum ada data dasawisma.</div>
+                                @endforelse
+                            </div>
                             @error('dasawisma')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
@@ -204,11 +220,24 @@
                                         ->values()
                                         ->all();
                                 @endphp
-                                <select class="form-select" name="dasawisma[]" multiple {{ $u->role === 'admin' ? 'disabled' : '' }} style="min-height: 120px;">
-                                    @foreach(($dasawismaOptions ?? collect()) as $opt)
-                                        <option value="{{ $opt }}" {{ in_array($opt, $selectedDasawisma, true) ? 'selected' : '' }}>{{ $opt }}</option>
-                                    @endforeach
-                                </select>
+                                <div class="border rounded p-2" style="max-height: 140px; overflow: auto;">
+                                    @forelse(($dasawismaOptions ?? collect()) as $opt)
+                                        <div class="form-check">
+                                            <input
+                                                class="form-check-input"
+                                                type="checkbox"
+                                                name="dasawisma[]"
+                                                id="editDasawisma{{ $u->id }}_{{ $loop->index }}"
+                                                value="{{ $opt }}"
+                                                {{ in_array($opt, $selectedDasawisma, true) ? 'checked' : '' }}
+                                                {{ $u->role === 'admin' ? 'disabled' : '' }}
+                                            >
+                                            <label class="form-check-label" for="editDasawisma{{ $u->id }}_{{ $loop->index }}">{{ $opt }}</label>
+                                        </div>
+                                    @empty
+                                        <div class="text-muted small">Belum ada data dasawisma.</div>
+                                    @endforelse
+                                </div>
                             </div>
                         </div>
                     </div>
