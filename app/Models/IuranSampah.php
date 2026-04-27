@@ -14,6 +14,7 @@ class IuranSampah extends Model
 
     protected $fillable = [
         'warga_id',
+        'nik',
         'bulan',
         'tahun',
         'nominal',

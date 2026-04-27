@@ -22,19 +22,6 @@
                             @csrf
 
                             <div class="mb-3">
-                                <label class="form-label">NIK</label>
-                                <div class="input-group">
-                                    <span class="input-group-text bg-white">
-                                        <i class="bi bi-card-text text-muted"></i>
-                                    </span>
-                                    <input type="text" class="form-control @error('nik') is-invalid @enderror" name="nik" value="{{ old('nik') }}" required maxlength="16" placeholder="Masukkan NIK 16 digit">
-                                    @error('nik')
-                                        <div class="invalid-feedback">{{ $message }}</div>
-                                    @enderror
-                                </div>
-                            </div>
-
-                            <div class="mb-3">
                                 <label class="form-label">Nama Lengkap</label>
                                 <div class="input-group">
                                     <span class="input-group-text bg-white">
@@ -48,13 +35,13 @@
                             </div>
 
                             <div class="mb-3">
-                                <label class="form-label">Email</label>
+                                <label class="form-label">Username</label>
                                 <div class="input-group">
                                     <span class="input-group-text bg-white">
-                                        <i class="bi bi-envelope text-muted"></i>
+                                        <i class="bi bi-person-badge text-muted"></i>
                                     </span>
-                                    <input type="email" class="form-control @error('email') is-invalid @enderror" name="email" value="{{ old('email') }}" required placeholder="email@contoh.com">
-                                    @error('email')
+                                    <input type="text" class="form-control @error('username') is-invalid @enderror" name="username" value="{{ old('username') }}" required placeholder="contoh: contoh_01">
+                                    @error('username')
                                         <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
                                 </div>
@@ -66,7 +53,10 @@
                                     <span class="input-group-text bg-white">
                                         <i class="bi bi-lock text-muted"></i>
                                     </span>
-                                    <input type="password" class="form-control @error('password') is-invalid @enderror" name="password" required placeholder="Minimal 8 karakter">
+                                    <input type="password" class="form-control @error('password') is-invalid @enderror" name="password" id="password" required placeholder="Minimal 8 karakter">
+                                    <button class="btn btn-outline-secondary border-start-0 bg-white" type="button" id="togglePassword" style="border-color: #dee2e6;">
+                                        <i class="bi bi-eye-slash text-muted" id="toggleIcon"></i>
+                                    </button>
                                     @error('password')
                                         <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
@@ -79,7 +69,10 @@
                                     <span class="input-group-text bg-white">
                                         <i class="bi bi-shield-lock text-muted"></i>
                                     </span>
-                                    <input type="password" class="form-control" name="password_confirmation" required placeholder="Ulangi password">
+                                    <input type="password" class="form-control" name="password_confirmation" id="passwordConfirmation" required placeholder="Ulangi password">
+                                    <button class="btn btn-outline-secondary border-start-0 bg-white" type="button" id="togglePasswordConfirmation" style="border-color: #dee2e6;">
+                                        <i class="bi bi-eye-slash text-muted" id="toggleIconConfirmation"></i>
+                                    </button>
                                 </div>
                             </div>
 
@@ -128,4 +121,26 @@
 
 @push('scripts')
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    const togglePassword = document.querySelector('#togglePassword');
+    const password = document.querySelector('#password');
+    const toggleIcon = document.querySelector('#toggleIcon');
+    const togglePasswordConfirmation = document.querySelector('#togglePasswordConfirmation');
+    const passwordConfirmation = document.querySelector('#passwordConfirmation');
+    const toggleIconConfirmation = document.querySelector('#toggleIconConfirmation');
+
+    togglePassword.addEventListener('click', function () {
+        const type = password.getAttribute('type') === 'password' ? 'text' : 'password';
+        password.setAttribute('type', type);
+        toggleIcon.classList.toggle('bi-eye');
+        toggleIcon.classList.toggle('bi-eye-slash');
+    });
+
+    togglePasswordConfirmation.addEventListener('click', function () {
+        const type = passwordConfirmation.getAttribute('type') === 'password' ? 'text' : 'password';
+        passwordConfirmation.setAttribute('type', type);
+        toggleIconConfirmation.classList.toggle('bi-eye');
+        toggleIconConfirmation.classList.toggle('bi-eye-slash');
+    });
+</script>
 @endpush

@@ -13,7 +13,7 @@
                             <img src="{{ asset('img/Bougenville.png') }}" alt="Logo" style="width: 80px; height: auto;">
                         </div>
                         <h4 class="mb-0 text-white fw-bold">Bouclear</h4>
-                        <p class="mb-0 text-white opacity-75 small">Bank Sampah Digital</p>
+                       
                     </div>
                     <div class="card-body p-4">
                         <h5 class="text-center mb-4">Masuk ke Akun</h5>
@@ -22,13 +22,13 @@
                             @csrf
 
                             <div class="mb-3">
-                                <label class="form-label">Email</label>
+                                <label class="form-label">Username</label>
                                 <div class="input-group">
                                     <span class="input-group-text bg-white">
-                                        <i class="bi bi-envelope text-muted"></i>
+                                        <i class="bi bi-person-badge text-muted"></i>
                                     </span>
-                                    <input type="email" class="form-control @error('email') is-invalid @enderror" name="email" value="{{ old('email') }}" required autofocus placeholder="email@contoh.com">
-                                    @error('email')
+                                    <input type="text" class="form-control @error('username') is-invalid @enderror" name="username" value="{{ old('username') }}" required autofocus placeholder="Masukkan username">
+                                    @error('username')
                                         <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
                                 </div>
@@ -62,9 +62,7 @@
                             </button>
                         </form>
 
-                        <div class="text-center mt-4">
-                            <p class="small text-muted mb-0">Belum punya akun? <a href="{{ route('register') }}" class="text-primary fw-bold text-decoration-none">Daftar di sini</a></p>
-                        </div>
+                      
                     </div>
                     <div class="card-footer text-center py-3 bg-light">
                         <small class="text-muted">Bank Sampah Digital &copy; {{ date('Y') }}</small>

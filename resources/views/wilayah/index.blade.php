@@ -107,13 +107,7 @@
                             </td>
                             <td>
                                 @php
-                                    $countKey = implode('|', [
-                                        $wilayah->kecamatan,
-                                        $wilayah->kelurahan,
-                                        $wilayah->rt,
-                                        $wilayah->rw,
-                                        $wilayah->dasawisma,
-                                    ]);
+                                    $countKey = mb_strtolower(trim((string) $wilayah->dasawisma));
                                     $penggunaCount = $penggunaCountMap[$countKey] ?? 0;
                                     $penggunaBadgeClass = $penggunaCount > 0 ? 'bg-warning text-dark' : 'bg-primary text-white';
                                 @endphp
@@ -173,13 +167,7 @@
                         $dasawismaNo = $m[2];
                     }
 
-                    $countKey = implode('|', [
-                        $wilayah->kecamatan,
-                        $wilayah->kelurahan,
-                        $wilayah->rt,
-                        $wilayah->rw,
-                        $wilayah->dasawisma,
-                    ]);
+                    $countKey = mb_strtolower(trim((string) $wilayah->dasawisma));
                     $penggunaCount = $penggunaCountMap[$countKey] ?? 0;
                 @endphp
                 <div class="modal fade" id="penggunaWilayahModal{{ $wilayah->id }}" tabindex="-1" aria-hidden="true">
@@ -203,16 +191,16 @@
                                         </thead>
                                         <tbody>
                                             @php
-                                                $wargaList = $penggunaWargaMap[$countKey] ?? collect();
+                                                $userList = $penggunaUserMap[$countKey] ?? collect();
                                             @endphp
-                                            @forelse($wargaList as $i => $w)
+                                            @forelse($userList as $i => $u)
                                                 <tr>
                                                     <td class="text-center">{{ $i + 1 }}</td>
-                                                    <td class="fw-semibold">{{ $w->nama_lengkap }}</td>
-                                                    <td class="text-muted">{{ $w->accountUser?->email ?? '-' }}</td>
+                                                    <td class="fw-semibold">{{ $u->name }}</td>
+                                                    <td class="text-muted">{{ $u->username ?? '-' }}</td>
                                                     <td>
-                                                        @if($w->accountUser?->last_login_at)
-                                                            {{ $w->accountUser->last_login_at->format('d/m/Y H:i') }}
+                                                        @if($u->last_login_at)
+                                                            {{ $u->last_login_at->format('d/m/Y H:i') }}
                                                         @else
                                                             <span class="text-muted">Belum Pernah Login</span>
                                                         @endif
@@ -220,10 +208,10 @@
                                                     <td>
                                                         @if(Auth::user()->role === 'admin')
                                                             <div class="btn-group">
-                                                                <a href="{{ route('warga.edit', $w) }}" class="btn btn-sm btn-outline-primary rounded-pill" title="Edit">
+                                                                <a href="{{ route('users.create', ['search' => $u->username]) }}" class="btn btn-sm btn-outline-primary rounded-pill" title="Edit">
                                                                     <i class="bi bi-pencil"></i>
                                                                 </a>
-                                                                <form action="{{ route('warga.destroy', $w) }}" method="POST" class="d-inline">
+                                                                <form action="{{ route('users.destroy', $u) }}" method="POST" class="d-inline">
                                                                     @csrf
                                                                     @method('DELETE')
                                                                     <button type="submit" class="btn btn-sm btn-outline-danger rounded-pill" onclick="return confirm('Yakin hapus?')" title="Hapus">
@@ -360,12 +348,12 @@
                                     <tr>
                                         <td class="text-center">{{ $i + 1 }}</td>
                                         <td class="fw-semibold">{{ $u->name }}</td>
-                                        <td>{{ $u->email }}</td>
+                                        <td>{{ $u->username }}</td>
                                         <td>
-                                            @if($u->last_activity_at)
-                                                {{ $u->last_activity_at->format('d/m/Y H:i') }}
+                                                        @if($u->last_login_at)
+                                                            {{ $u->last_login_at->format('d/m/Y H:i') }}
                                             @else
-                                                <span class="text-muted">-</span>
+                                                            <span class="text-muted">Belum Pernah Login</span>
                                             @endif
                                         </td>
                                         <td>
@@ -373,13 +361,15 @@
                                                 <button type="button" class="btn btn-sm btn-outline-primary rounded-pill" data-bs-toggle="modal" data-bs-target="#userEditModal{{ $u->id }}">
                                                     <i class="bi bi-pencil"></i>
                                                 </button>
-                                                <form action="{{ route('users.destroy', $u) }}" method="POST" class="d-inline">
-                                                    @csrf
-                                                    @method('DELETE')
-                                                    <button type="submit" class="btn btn-sm btn-outline-danger rounded-pill" onclick="return confirm('Yakin hapus pengguna ini?')">
-                                                        <i class="bi bi-trash"></i>
-                                                    </button>
-                                                </form>
+                                                            @if($u->role !== 'admin')
+                                                                <form action="{{ route('users.destroy', $u) }}" method="POST" class="d-inline" id="wilayahDeleteForm{{ $u->id }}">
+                                                                    @csrf
+                                                                    @method('DELETE')
+                                                                    <button type="button" class="btn btn-sm btn-outline-danger rounded-pill" data-bs-toggle="modal" data-bs-target="#wilayahDeleteConfirmModal" data-delete-form="wilayahDeleteForm{{ $u->id }}">
+                                                                        <i class="bi bi-trash"></i>
+                                                                    </button>
+                                                                </form>
+                                                            @endif
                                             </div>
                                         </td>
                                     </tr>
@@ -409,8 +399,8 @@
                                                 <input type="text" class="form-control" name="name" value="{{ $u->name }}" required>
                                             </div>
                                             <div class="mb-3">
-                                                <label class="form-label">Email</label>
-                                                <input type="email" class="form-control" name="email" value="{{ $u->email }}" required>
+                                                <label class="form-label">Username</label>
+                                                <input type="text" class="form-control" name="username" value="{{ $u->username }}" required>
                                             </div>
                                             <div class="mb-3">
                                                 <label class="form-label">Role</label>
@@ -437,4 +427,43 @@
         </div>
     </div>
 @endif
+
+<div class="modal fade" id="wilayahDeleteConfirmModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Peringatan</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="alert alert-warning mb-0" role="alert">
+                    <i class="bi bi-exclamation-triangle me-2"></i>Yakin hapus pengguna ini?
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary rounded-pill" data-bs-dismiss="modal">Batal</button>
+                <button type="button" class="btn btn-danger rounded-pill" id="wilayahConfirmDeleteButton">Hapus</button>
+            </div>
+        </div>
+    </div>
+</div>
 @endsection
+
+@push('scripts')
+<script>
+    const wilayahDeleteConfirmModal = document.getElementById('wilayahDeleteConfirmModal');
+    const wilayahConfirmDeleteButton = document.getElementById('wilayahConfirmDeleteButton');
+    let wilayahDeleteFormId = null;
+
+    wilayahDeleteConfirmModal?.addEventListener('show.bs.modal', function (event) {
+        const button = event.relatedTarget;
+        wilayahDeleteFormId = button?.getAttribute('data-delete-form') || null;
+    });
+
+    wilayahConfirmDeleteButton?.addEventListener('click', function () {
+        if (!wilayahDeleteFormId) return;
+        const form = document.getElementById(wilayahDeleteFormId);
+        form?.submit();
+    });
+</script>
+@endpush

@@ -20,8 +20,6 @@ Route::post('/contact', [ContactMessageController::class, 'store'])->name('conta
 
 Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
 Route::post('/login', [AuthController::class, 'login']);
-Route::get('/register', [AuthController::class, 'showRegisterForm'])->name('register');
-Route::post('/register', [AuthController::class, 'register']);
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
 Route::middleware(['auth', 'role:admin,user,warga'])->group(function () {
@@ -54,7 +52,7 @@ Route::middleware(['auth', 'role:admin,user,warga'])->group(function () {
         Route::delete('iuran-sampah/{iuran_sampah}', [IuranSampahController::class, 'destroy'])->name('iuran-sampah.destroy');
 
         Route::resource('wilayah', WilayahController::class)->except(['show', 'index']);
-        Route::resource('users', UserController::class)->only(['update', 'destroy']);
+        Route::resource('users', UserController::class)->only(['create', 'store', 'update', 'destroy']);
         Route::get('contact-messages', [ContactMessageController::class, 'index'])->name('contact-messages.index');
         Route::post('contact-messages/{contactMessage}/read', [ContactMessageController::class, 'markRead'])->name('contact-messages.read');
 

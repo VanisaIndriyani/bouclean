@@ -67,7 +67,7 @@
                 <thead>
                     <tr>
                         <th width="50">No</th>
-                        <th>Warga</th>
+                        <th>Kepala keluarga</th>
                         <th>Periode</th>
                         <th>Nominal</th>
                         <th>Status</th>
@@ -81,8 +81,12 @@
                     <tr>
                         <td class="text-center">{{ $iuranSampahs->firstItem() + $index }}</td>
                         <td>
-                            <strong>{{ $iuran->warga->nama_lengkap }}</strong><br>
-                            <small class="text-muted">{{ $iuran->warga->nik_masked }}</small>
+                            @if($iuran->warga)
+                                <strong>{{ $iuran->warga->nama_lengkap }}</strong><br>
+                                <small class="text-muted">{{ $iuran->warga->nik_masked }}</small>
+                            @else
+                                <small class="text-muted">{{ $iuran->nik }}</small>
+                            @endif
                         </td>
                         <td>{{ $iuran->bulan }} {{ $iuran->tahun }}</td>
                         <td>Rp {{ number_format($iuran->nominal, 0, ',', '.') }}</td>

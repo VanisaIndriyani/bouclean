@@ -3,33 +3,12 @@
 namespace App\Http\Controllers;
 
 use App\Models\PilahSampah;
-use App\Models\Warga;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 
 class PilahSampahController extends Controller
 {
-    private function normalizeNik(?string $nik): string
-    {
-        return preg_replace('/\D+/', '', (string) $nik) ?? '';
-    }
-
-    private function resolveWarga(Request $request, array $validated): ?Warga
-    {
-        $wargaId = $request->filled('warga_id') ? (int) $request->input('warga_id') : 0;
-        if ($wargaId > 0) {
-            return Warga::query()->find($wargaId);
-        }
-
-        $nik = $this->normalizeNik($validated['kepala_keluarga_nik'] ?? null);
-        if (strlen($nik) !== 16) {
-            return null;
-        }
-
-        return Warga::query()->where('nik', $nik)->first();
-    }
-
     public function index(Request $request)
     {
         $query = PilahSampah::with(['warga', 'user']);
@@ -38,10 +17,12 @@ class PilahSampahController extends Controller
             $search = (string) $request->search;
 
             $query->where(function ($q) use ($search) {
-                $q->whereHas('warga', function ($wargaQuery) use ($search) {
-                    $wargaQuery->where('nama_lengkap', 'like', "%{$search}%")
-                        ->orWhere('nik', 'like', "%{$search}%");
-                })
+                $q->orWhere('kepala_keluarga_nama', 'like', "%{$search}%")
+                    ->orWhere('kepala_keluarga_nik', 'like', "%{$search}%")
+                    ->orWhereHas('warga', function ($wargaQuery) use ($search) {
+                        $wargaQuery->where('nama_lengkap', 'like', "%{$search}%")
+                            ->orWhere('nik', 'like', "%{$search}%");
+                    })
                     ->orWhere('kecamatan', 'like', "%{$search}%")
                     ->orWhere('kelurahan', 'like', "%{$search}%")
                     ->orWhere('rt', 'like', "%{$search}%")
@@ -64,12 +45,13 @@ class PilahSampahController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'kepala_keluarga_nik' => 'required|string',
-            'warga_id' => 'nullable|integer',
+            'kepala_keluarga_nik' => 'required|string|max:255',
+            'bulan' => 'required|integer|min:1|max:12',
+            'tahun' => 'required|integer|min:1900|max:2100',
             'kecamatan' => 'nullable|string|max:255',
             'kelurahan' => 'nullable|string|max:255',
-            'rt' => 'nullable|string|max:3',
-            'rw' => 'nullable|string|max:3',
+            'rt' => ['nullable', 'string', 'max:10', 'regex:/^\d+$/'],
+            'rw' => ['nullable', 'string', 'max:10', 'regex:/^(\d+|[IVXLCDM]+)$/i'],
             'dasawisma' => 'nullable|string|max:255',
             'jenis_sampah' => 'nullable|string|max:255',
             'berat' => 'required|numeric|min:0.01',
@@ -78,29 +60,22 @@ class PilahSampahController extends Controller
             'foto' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
         ]);
 
-        $warga = $this->resolveWarga($request, $validated);
-        if (! $warga) {
-            return back()
-                ->withErrors(['kepala_keluarga_nik' => 'Pilih kepala keluarga dari daftar.'])
-                ->withInput();
-        }
-
-        $validated['warga_id'] = $warga->id;
-        $validated['jenis_kelamin'] = $warga->jenis_kelamin;
         $validated['user_id'] = Auth::id();
 
-        foreach (['kecamatan', 'kelurahan', 'rt', 'rw', 'dasawisma'] as $field) {
+        $validated['kepala_keluarga_nik'] = trim((string) ($validated['kepala_keluarga_nik'] ?? ''));
+        $validated['kepala_keluarga_nama'] = null;
+
+        $validated['jenis_kelamin'] = null;
+        $validated['warga_id'] = null;
+
+        foreach (['kecamatan', 'kelurahan', 'rt', 'rw', 'dasawisma', 'jenis_sampah'] as $field) {
             $value = array_key_exists($field, $validated) ? trim((string) $validated[$field]) : '';
-            if ($value === '') {
-                $validated[$field] = (string) ($warga->{$field} ?? '');
-            }
+            $validated[$field] = $value === '' ? null : $value;
         }
 
         if ($request->hasFile('foto')) {
             $validated['foto'] = $request->file('foto')->store('pilah-sampah', 'public');
         }
-
-        unset($validated['kepala_keluarga_nik']);
 
         PilahSampah::create($validated);
 
@@ -119,12 +94,13 @@ class PilahSampahController extends Controller
         $pilahSampah = $pilah_sampah;
 
         $validated = $request->validate([
-            'kepala_keluarga_nik' => 'required|string',
-            'warga_id' => 'nullable|integer',
+            'kepala_keluarga_nik' => 'required|string|max:255',
+            'bulan' => 'required|integer|min:1|max:12',
+            'tahun' => 'required|integer|min:1900|max:2100',
             'kecamatan' => 'nullable|string|max:255',
             'kelurahan' => 'nullable|string|max:255',
-            'rt' => 'nullable|string|max:3',
-            'rw' => 'nullable|string|max:3',
+            'rt' => ['nullable', 'string', 'max:10', 'regex:/^\d+$/'],
+            'rw' => ['nullable', 'string', 'max:10', 'regex:/^(\d+|[IVXLCDM]+)$/i'],
             'dasawisma' => 'nullable|string|max:255',
             'jenis_sampah' => 'nullable|string|max:255',
             'berat' => 'required|numeric|min:0.01',
@@ -133,21 +109,15 @@ class PilahSampahController extends Controller
             'foto' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
         ]);
 
-        $warga = $this->resolveWarga($request, $validated);
-        if (! $warga) {
-            return back()
-                ->withErrors(['kepala_keluarga_nik' => 'Pilih kepala keluarga dari daftar.'])
-                ->withInput();
-        }
+        $validated['kepala_keluarga_nik'] = trim((string) ($validated['kepala_keluarga_nik'] ?? ''));
+        $validated['kepala_keluarga_nama'] = null;
 
-        $validated['warga_id'] = $warga->id;
-        $validated['jenis_kelamin'] = $warga->jenis_kelamin;
+        $validated['jenis_kelamin'] = null;
+        $validated['warga_id'] = null;
 
-        foreach (['kecamatan', 'kelurahan', 'rt', 'rw', 'dasawisma'] as $field) {
+        foreach (['kecamatan', 'kelurahan', 'rt', 'rw', 'dasawisma', 'jenis_sampah'] as $field) {
             $value = array_key_exists($field, $validated) ? trim((string) $validated[$field]) : '';
-            if ($value === '') {
-                $validated[$field] = (string) ($warga->{$field} ?? '');
-            }
+            $validated[$field] = $value === '' ? null : $value;
         }
 
         if ($request->hasFile('foto')) {
@@ -156,8 +126,6 @@ class PilahSampahController extends Controller
             }
             $validated['foto'] = $request->file('foto')->store('pilah-sampah', 'public');
         }
-
-        unset($validated['kepala_keluarga_nik']);
 
         $pilahSampah->update($validated);
 

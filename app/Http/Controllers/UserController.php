@@ -3,20 +3,154 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use App\Models\Wilayah;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Schema;
 
 class UserController extends Controller
 {
-    public function update(Request $request, User $user)
+    public function create(Request $request)
     {
+        $dasawismaOptions = Wilayah::query()
+            ->select('dasawisma')
+            ->whereNotNull('dasawisma')
+            ->where('dasawisma', '!=', '')
+            ->distinct()
+            ->orderBy('dasawisma')
+            ->pluck('dasawisma');
+
+        $search = trim((string) $request->get('search', ''));
+        $hasUsername = Schema::hasColumn('users', 'username');
+        $hasDasawisma = Schema::hasColumn('users', 'dasawisma');
+
+        $users = User::query()
+            ->where('role', 'user')
+            ->when($search !== '', function ($q) use ($search, $hasDasawisma, $hasUsername) {
+                $q->where(function ($qq) use ($search, $hasDasawisma, $hasUsername) {
+                    $qq->where('name', 'like', '%'.$search.'%');
+                    if ($hasDasawisma) {
+                        $qq->orWhere('dasawisma', 'like', '%'.$search.'%');
+                    }
+                    if ($hasUsername) {
+                        $qq->orWhere('username', 'like', '%'.$search.'%');
+                    }
+                });
+            })
+            ->orderBy('name')
+            ->get();
+
+        if ($search !== '') {
+            if ($hasUsername) {
+                $users = $users->filter(function (User $u) use ($search) {
+                    return str_contains(strtolower((string) ($u->username ?? '')), strtolower($search))
+                        || str_contains(strtolower((string) $u->name), strtolower($search))
+                        || str_contains(strtolower((string) ($u->dasawisma ?? '')), strtolower($search));
+                })->values();
+            } else {
+                $users = $users->filter(function (User $u) use ($search) {
+                    return str_contains(strtolower((string) $u->name), strtolower($search))
+                        || str_contains(strtolower((string) ($u->dasawisma ?? '')), strtolower($search));
+                })->values();
+            }
+        }
+
+        if (! $hasUsername) {
+            $users->each(function (User $u) {
+                $u->setAttribute('username', (string) ($u->email ?? ''));
+            });
+        }
+
+        if (! $hasDasawisma) {
+            $users->each(function (User $u) {
+                $u->setAttribute('dasawisma', null);
+            });
+        }
+
+        return view('users.create', [
+            'users' => $users,
+            'dasawismaOptions' => $dasawismaOptions,
+            'search' => $search,
+        ]);
+    }
+
+    public function store(Request $request)
+    {
+        if (! Schema::hasColumn('users', 'username')) {
+            return back()
+                ->with('error', "Kolom 'username' belum ada di database. Jalankan: php artisan migrate")
+                ->withInput();
+        }
+        if (! Schema::hasColumn('users', 'dasawisma')) {
+            return back()
+                ->with('error', "Kolom 'dasawisma' belum ada di database. Jalankan: php artisan migrate")
+                ->withInput();
+        }
+
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'email' => 'required|email|max:255|unique:users,email,'.$user->id,
-            'role' => 'required|in:admin,user',
+            'dasawisma' => 'required|array|min:1',
+            'dasawisma.*' => 'required|string|max:255',
+            'username' => ['required', 'string', 'min:3', 'max:30', 'regex:/^[a-zA-Z0-9_.]+$/', 'unique:users,username'],
+            'password' => 'required|string|min:8|confirmed',
         ]);
 
-        $user->update($validated);
+        $username = strtolower(trim((string) $validated['username']));
+        $dasawisma = collect($validated['dasawisma'])
+            ->map(fn ($d) => trim((string) $d))
+            ->filter(fn ($d) => $d !== '')
+            ->unique()
+            ->implode(', ');
+
+        User::create([
+            'name' => trim((string) $validated['name']),
+            'dasawisma' => $dasawisma !== '' ? $dasawisma : null,
+            'username' => $username,
+            'email' => $username.'@bouclear.invalid',
+            'password' => Hash::make($validated['password']),
+            'role' => 'user',
+            'last_login_at' => null,
+        ]);
+
+        return redirect()->route('users.create')->with('success', 'Akun user berhasil dibuat.');
+    }
+
+    public function update(Request $request, User $user)
+    {
+        if (! Schema::hasColumn('users', 'username')) {
+            return back()
+                ->with('error', "Kolom 'username' belum ada di database. Jalankan: php artisan migrate")
+                ->withInput();
+        }
+        if (! Schema::hasColumn('users', 'dasawisma')) {
+            return back()
+                ->with('error', "Kolom 'dasawisma' belum ada di database. Jalankan: php artisan migrate")
+                ->withInput();
+        }
+
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'username' => ['required', 'string', 'min:3', 'max:30', 'regex:/^[a-zA-Z0-9_.]+$/', 'unique:users,username,'.$user->id],
+            'dasawisma' => 'nullable|array',
+            'dasawisma.*' => 'required|string|max:255',
+        ]);
+
+        $dasawisma = collect($validated['dasawisma'] ?? [])
+            ->map(fn ($d) => trim((string) $d))
+            ->filter(fn ($d) => $d !== '')
+            ->unique()
+            ->implode(', ');
+        if ($user->role === 'admin') {
+            $dasawisma = (string) ($user->dasawisma ?? '');
+        }
+
+        $user->update([
+            'name' => trim((string) $validated['name']),
+            'dasawisma' => $dasawisma !== '' ? $dasawisma : null,
+            'username' => strtolower(trim((string) $validated['username'])),
+            'email' => strtolower(trim((string) $validated['username'])).'@bouclear.invalid',
+        ]);
 
         return back()->with('success', 'Data pengguna berhasil diperbarui.');
     }
@@ -28,10 +162,7 @@ class UserController extends Controller
         }
 
         if ($user->role === 'admin') {
-            $adminCount = User::query()->where('role', 'admin')->count();
-            if ($adminCount <= 1) {
-                return back()->with('error', 'Tidak bisa menghapus admin terakhir.');
-            }
+            return back()->with('error', 'Akun admin tidak bisa dihapus.');
         }
 
         $user->delete();

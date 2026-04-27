@@ -3,17 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Models\IuranSampah;
-use App\Models\Warga;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class IuranSampahController extends Controller
 {
-    private function normalizeNik(?string $nik): string
-    {
-        return preg_replace('/\D+/', '', (string) $nik) ?? '';
-    }
-
     public function index(Request $request)
     {
         $query = IuranSampah::with(['warga', 'user']);
@@ -34,6 +28,7 @@ class IuranSampahController extends Controller
             $search = $request->search;
             $query->where(function ($q) use ($search) {
                 $q->where('petugas', 'like', "%{$search}%")
+                    ->orWhere('nik', 'like', "%{$search}%")
                     ->orWhereHas('warga', function ($qw) use ($search) {
                         $qw->where('nama_lengkap', 'like', "%{$search}%")
                             ->orWhere('nik', 'like', "%{$search}%");
@@ -82,7 +77,7 @@ class IuranSampahController extends Controller
         }
 
         $validated = $request->validate([
-            'nik' => 'required|string',
+            'nik' => 'required|string|max:255',
             'bulan' => 'required|in:Januari,Februari,Maret,April,Mei,Juni,Juli,Agustus,September,Oktober,November,Desember',
             'tahun' => 'required|integer|min:2020|max:2100',
             'nominal' => 'required|numeric|min:0',
@@ -91,21 +86,8 @@ class IuranSampahController extends Controller
             'petugas' => 'nullable|string|max:255',
         ]);
 
-        $nik = $this->normalizeNik($validated['nik']);
-        if (strlen($nik) !== 16) {
-            return back()
-                ->withErrors(['nik' => 'NIK harus 16 digit.'])
-                ->withInput();
-        }
-        $wargaId = Warga::query()->where('nik', $nik)->value('id');
-        if (! $wargaId) {
-            return back()
-                ->withErrors(['nik' => 'NIK tidak ditemukan.'])
-                ->withInput();
-        }
-
-        $validated['warga_id'] = $wargaId;
-        unset($validated['nik']);
+        $validated['nik'] = trim((string) $validated['nik']);
+        $validated['warga_id'] = null;
         $validated['user_id'] = Auth::id();
 
         if ($validated['status'] === 'lunas' && ! $request->has('tanggal_bayar')) {
@@ -153,7 +135,7 @@ class IuranSampahController extends Controller
         }
 
         $validated = $request->validate([
-            'nik' => 'required|string',
+            'nik' => 'required|string|max:255',
             'bulan' => 'required|in:Januari,Februari,Maret,April,Mei,Juni,Juli,Agustus,September,Oktober,November,Desember',
             'tahun' => 'required|integer|min:2020|max:2100',
             'nominal' => 'required|numeric|min:0',
@@ -162,21 +144,8 @@ class IuranSampahController extends Controller
             'petugas' => 'nullable|string|max:255',
         ]);
 
-        $nik = $this->normalizeNik($validated['nik']);
-        if (strlen($nik) !== 16) {
-            return back()
-                ->withErrors(['nik' => 'NIK harus 16 digit.'])
-                ->withInput();
-        }
-        $wargaId = Warga::query()->where('nik', $nik)->value('id');
-        if (! $wargaId) {
-            return back()
-                ->withErrors(['nik' => 'NIK tidak ditemukan.'])
-                ->withInput();
-        }
-
-        $validated['warga_id'] = $wargaId;
-        unset($validated['nik']);
+        $validated['nik'] = trim((string) $validated['nik']);
+        $validated['warga_id'] = null;
         $iuranSampah->update($validated);
 
         return redirect()->route('iuran-sampah.index')->with('success', 'Data iuran sampah berhasil diperbarui.');

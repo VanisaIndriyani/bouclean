@@ -24,12 +24,23 @@ class UserFactory extends Factory
      */
     public function definition(): array
     {
+        $username = fake()->unique()->userName();
+        $username = strtolower(trim((string) $username));
+        $username = preg_replace('/\s+/', '', $username) ?? $username;
+        $username = preg_replace('/[^a-z0-9_.]/', '', $username) ?? $username;
+        $username = substr($username, 0, 30);
+        if ($username === '') {
+            $username = 'user'.fake()->unique()->numberBetween(1000, 999999);
+        }
+
         return [
             'name' => fake()->name(),
-            'email' => fake()->unique()->safeEmail(),
+            'username' => $username,
+            'email' => $username.'@bouclear.invalid',
             'email_verified_at' => now(),
             'password' => static::$password ??= Hash::make('password'),
             'remember_token' => Str::random(10),
+            'role' => 'user',
         ];
     }
 

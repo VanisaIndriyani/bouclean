@@ -12,22 +12,60 @@
 
 <div class="card border-0 shadow-sm">
     <div class="card-body p-4">
+        @php
+            $bulanMap = [
+                1 => 'Januari',
+                2 => 'Februari',
+                3 => 'Maret',
+                4 => 'April',
+                5 => 'Mei',
+                6 => 'Juni',
+                7 => 'Juli',
+                8 => 'Agustus',
+                9 => 'September',
+                10 => 'Oktober',
+                11 => 'November',
+                12 => 'Desember',
+            ];
+        @endphp
         <form action="{{ route('pilah-sampah.update', $pilahSampah) }}" method="POST" enctype="multipart/form-data">
             @csrf
             @method('PUT')
 
             <div class="row g-4">
-                <div class="col-md-6">
-                    <label class="form-label">Kepala Keluarga (NIK) <span class="text-danger">*</span></label>
-                    <input type="text" class="form-control @error('kepala_keluarga_nik') is-invalid @enderror" id="kepalaKeluargaNikInput" name="kepala_keluarga_nik" value="{{ old('kepala_keluarga_nik', $pilahSampah->warga ? ($pilahSampah->warga->nama_lengkap.' ('.$pilahSampah->warga->nik.')') : '') }}" list="wargaNikList" autocomplete="off" required placeholder="Ketik nama atau NIK, contoh: Anen (3374...)">
-                    <input type="hidden" name="warga_id" id="wargaIdInput" value="{{ old('warga_id', $pilahSampah->warga_id) }}">
-                    <datalist id="wargaNikList"></datalist>
+                <div class="col-md-4">
+                    <label class="form-label">Kepala Keluarga (NIK)</label>
+                    <input type="text" class="form-control @error('kepala_keluarga_nik') is-invalid @enderror" name="kepala_keluarga_nik" value="{{ old('kepala_keluarga_nik', $pilahSampah->kepala_keluarga_nik ?? $pilahSampah->warga?->getRawOriginal('nik')) }}" required>
                     @error('kepala_keluarga_nik')
                         <div class="invalid-feedback">{{ $message }}</div>
                     @enderror
                 </div>
 
-                <div class="col-md-6">
+                <div class="col-md-4">
+                    <label class="form-label">Bulan <span class="text-danger">*</span></label>
+                    @php
+                        $bulanSelected = old('bulan', $pilahSampah->bulan ?? $pilahSampah->created_at?->month);
+                    @endphp
+                    <select class="form-select @error('bulan') is-invalid @enderror" name="bulan" required>
+                        <option value="">-- Pilih --</option>
+                        @foreach($bulanMap as $no => $nama)
+                            <option value="{{ $no }}" {{ (string) $bulanSelected === (string) $no ? 'selected' : '' }}>{{ $nama }}</option>
+                        @endforeach
+                    </select>
+                    @error('bulan')
+                        <div class="invalid-feedback">{{ $message }}</div>
+                    @enderror
+                </div>
+
+                <div class="col-md-4">
+                    <label class="form-label">Tahun <span class="text-danger">*</span></label>
+                    <input type="number" class="form-control @error('tahun') is-invalid @enderror" name="tahun" value="{{ old('tahun', $pilahSampah->tahun ?? $pilahSampah->created_at?->year) }}" min="1900" max="2100" required>
+                    @error('tahun')
+                        <div class="invalid-feedback">{{ $message }}</div>
+                    @enderror
+                </div>
+
+                <div class="col-md-4">
                     <label class="form-label">Jenis Sampah</label>
                     <input type="text" class="form-control @error('jenis_sampah') is-invalid @enderror" name="jenis_sampah" value="{{ old('jenis_sampah', $pilahSampah->jenis_sampah) }}" placeholder="Contoh: Plastik, Kertas, Logam">
                     @error('jenis_sampah')
@@ -58,7 +96,7 @@
 
                 <div class="col-md-2">
                     <label class="form-label">RT</label>
-                    <input type="text" class="form-control @error('rt') is-invalid @enderror" name="rt" id="rtInput" value="{{ old('rt', $pilahSampah->rt) }}" maxlength="3">
+                    <input type="text" class="form-control @error('rt') is-invalid @enderror" name="rt" id="rtInput" value="{{ old('rt', $pilahSampah->rt) }}">
                     @error('rt')
                         <div class="invalid-feedback">{{ $message }}</div>
                     @enderror
@@ -66,7 +104,7 @@
 
                 <div class="col-md-2">
                     <label class="form-label">RW</label>
-                    <input type="text" class="form-control @error('rw') is-invalid @enderror" name="rw" id="rwInput" value="{{ old('rw', $pilahSampah->rw) }}" maxlength="3">
+                    <input type="text" class="form-control @error('rw') is-invalid @enderror" name="rw" id="rwInput" value="{{ old('rw', $pilahSampah->rw) }}">
                     @error('rw')
                         <div class="invalid-feedback">{{ $message }}</div>
                     @enderror
@@ -149,58 +187,6 @@
 
 @push('scripts')
 <script>
-    (function() {
-        const input = document.getElementById('kepalaKeluargaNikInput');
-        const list = document.getElementById('wargaNikList');
-        const wargaIdInput = document.getElementById('wargaIdInput');
-        if (!input || !list || !wargaIdInput) return;
-
-        const endpoint = @json(route('warga.lookup'));
-        let timer = null;
-        let valueToId = new Map();
-
-        function escapeHtml(value) {
-            return String(value)
-                .replaceAll('&', '&amp;')
-                .replaceAll('<', '&lt;')
-                .replaceAll('>', '&gt;')
-                .replaceAll('"', '&quot;')
-                .replaceAll("'", '&#039;');
-        }
-
-        async function fetchOptions(q) {
-            const res = await fetch(`${endpoint}?q=${encodeURIComponent(q)}`, {
-                headers: { 'Accept': 'application/json' }
-            });
-            if (!res.ok) return [];
-            const data = await res.json();
-            return Array.isArray(data) ? data : [];
-        }
-
-        input.addEventListener('input', function() {
-            const q = input.value.trim();
-            wargaIdInput.value = '';
-            if (timer) clearTimeout(timer);
-            timer = setTimeout(async () => {
-                if (q.length < 2) {
-                    valueToId = new Map();
-                    list.innerHTML = '';
-                    return;
-                }
-                const options = await fetchOptions(q);
-                valueToId = new Map(options.map(o => [String(o.value ?? ''), String(o.id ?? '')]));
-                list.innerHTML = options
-                    .map(o => `<option value="${escapeHtml(o.value ?? '')}"></option>`)
-                    .join('');
-            }, 250);
-        });
-
-        input.addEventListener('change', function () {
-            const id = valueToId.get(input.value) ?? '';
-            wargaIdInput.value = id;
-        });
-    })();
-
     document.getElementById('fotoPickBtn').addEventListener('click', function() {
         document.getElementById('fotoInput').click();
     });

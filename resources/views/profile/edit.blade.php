@@ -23,7 +23,7 @@
                 @endif
             </div>
             <h5 class="mb-1">{{ $user->name }}</h5>
-            <p class="text-muted small mb-3">{{ $user->email }}</p>
+            <p class="text-muted small mb-3">{{ $user->username }}</p>
             <span class="badge bg-secondary rounded-pill px-3">{{ ucfirst($user->role) }}</span>
         </div>
     </div>
@@ -46,9 +46,9 @@
                             @enderror
                         </div>
                         <div class="col-md-6">
-                            <label class="form-label">Email</label>
-                            <input type="email" class="form-control @error('email') is-invalid @enderror" name="email" value="{{ old('email', $user->email) }}" required>
-                            @error('email')
+                            <label class="form-label">Username</label>
+                            <input type="text" class="form-control @error('username') is-invalid @enderror" name="username" value="{{ old('username', $user->username) }}" required>
+                            @error('username')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
                         </div>
@@ -69,21 +69,36 @@
                     <div class="row g-3">
                         <div class="col-12">
                             <label class="form-label">Password Saat Ini</label>
-                            <input type="password" class="form-control @error('current_password') is-invalid @enderror" name="current_password">
-                            @error('current_password')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
+                            <div class="input-group">
+                                <input type="password" class="form-control @error('current_password') is-invalid @enderror" name="current_password" id="currentPassword">
+                                <button class="btn btn-outline-secondary border-start-0 bg-white" type="button" id="toggleCurrentPassword" style="border-color: #dee2e6;">
+                                    <i class="bi bi-eye-slash text-muted" id="toggleCurrentPasswordIcon"></i>
+                                </button>
+                                @error('current_password')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
                         </div>
                         <div class="col-md-6">
                             <label class="form-label">Password Baru</label>
-                            <input type="password" class="form-control @error('new_password') is-invalid @enderror" name="new_password">
-                            @error('new_password')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
+                            <div class="input-group">
+                                <input type="password" class="form-control @error('new_password') is-invalid @enderror" name="new_password" id="newPassword">
+                                <button class="btn btn-outline-secondary border-start-0 bg-white" type="button" id="toggleNewPassword" style="border-color: #dee2e6;">
+                                    <i class="bi bi-eye-slash text-muted" id="toggleNewPasswordIcon"></i>
+                                </button>
+                                @error('new_password')
+                                    <div class="invalid-feedback">{{ $message }}</div>
+                                @enderror
+                            </div>
                         </div>
                         <div class="col-md-6">
                             <label class="form-label">Konfirmasi Password Baru</label>
-                            <input type="password" class="form-control" name="new_password_confirmation">
+                            <div class="input-group">
+                                <input type="password" class="form-control" name="new_password_confirmation" id="newPasswordConfirmation">
+                                <button class="btn btn-outline-secondary border-start-0 bg-white" type="button" id="toggleNewPasswordConfirmation" style="border-color: #dee2e6;">
+                                    <i class="bi bi-eye-slash text-muted" id="toggleNewPasswordConfirmationIcon"></i>
+                                </button>
+                            </div>
                         </div>
                     </div>
 
@@ -98,3 +113,26 @@
     </div>
 </div>
 @endsection
+
+@push('scripts')
+<script>
+    const toggleField = (toggleButtonId, inputId, iconId) => {
+        const toggleButton = document.getElementById(toggleButtonId);
+        const input = document.getElementById(inputId);
+        const icon = document.getElementById(iconId);
+
+        if (!toggleButton || !input || !icon) return;
+
+        toggleButton.addEventListener('click', function () {
+            const type = input.getAttribute('type') === 'password' ? 'text' : 'password';
+            input.setAttribute('type', type);
+            icon.classList.toggle('bi-eye');
+            icon.classList.toggle('bi-eye-slash');
+        });
+    };
+
+    toggleField('toggleCurrentPassword', 'currentPassword', 'toggleCurrentPasswordIcon');
+    toggleField('toggleNewPassword', 'newPassword', 'toggleNewPasswordIcon');
+    toggleField('toggleNewPasswordConfirmation', 'newPasswordConfirmation', 'toggleNewPasswordConfirmationIcon');
+</script>
+@endpush

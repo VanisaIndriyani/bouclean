@@ -269,7 +269,7 @@
 
             @if(Auth::user()->role === 'admin')
             @php
-                $dataMasterActive = request()->routeIs('wilayah.index');
+                $dataMasterActive = request()->routeIs('wilayah.*') || request()->routeIs('users.*');
                 $dataMasterExpanded = $dataMasterActive ? 'show' : '';
             @endphp
             <li class="nav-item mt-2">
@@ -285,6 +285,11 @@
                         <li class="nav-item">
                             <a class="nav-link py-2 {{ request()->routeIs('wilayah.index') ? 'active' : '' }}" href="{{ route('wilayah.index') }}">
                                 Dasawisma
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link py-2 {{ request()->routeIs('users.create') ? 'active' : '' }}" href="{{ route('users.create') }}">
+                                Buat Akun User
                             </a>
                         </li>
                     </ul>
@@ -329,9 +334,7 @@
                     <i class="bi bi-list fs-4"></i>
                 </button>
                 <div class="ms-auto d-flex align-items-center gap-3">
-                    <div class="d-none d-lg-block text-muted small">
-                        Semarang Utara, Plombokan, RW III RT 5
-                    </div>
+                   
                     <div class="dropdown">
                         <a class="dropdown-toggle text-dark text-decoration-none d-flex align-items-center profile-dropdown" href="#" role="button" data-bs-toggle="dropdown">
                             @if(Auth::user()->avatar)

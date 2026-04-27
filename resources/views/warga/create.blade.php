@@ -79,7 +79,7 @@
 
                 <div class="col-md-2">
                     <label class="form-label">RT <span class="text-danger">*</span></label>
-                    <input type="text" class="form-control @error('rt') is-invalid @enderror" name="rt" value="{{ old('rt') }}" maxlength="3" required>
+                    <input type="text" class="form-control @error('rt') is-invalid @enderror" name="rt" value="{{ old('rt') }}" required>
                     @error('rt')
                         <div class="invalid-feedback">{{ $message }}</div>
                     @enderror
@@ -87,7 +87,7 @@
 
                 <div class="col-md-2">
                     <label class="form-label">RW <span class="text-danger">*</span></label>
-                    <input type="text" class="form-control @error('rw') is-invalid @enderror" name="rw" value="{{ old('rw') }}" maxlength="3" required>
+                    <input type="text" class="form-control @error('rw') is-invalid @enderror" name="rw" value="{{ old('rw') }}" required>
                     @error('rw')
                         <div class="invalid-feedback">{{ $message }}</div>
                     @enderror

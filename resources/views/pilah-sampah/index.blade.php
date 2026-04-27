@@ -15,6 +15,22 @@
 
 <div class="card border-0 shadow-sm">
     <div class="card-body">
+        @php
+            $bulanMap = [
+                1 => 'Januari',
+                2 => 'Februari',
+                3 => 'Maret',
+                4 => 'April',
+                5 => 'Mei',
+                6 => 'Juni',
+                7 => 'Juli',
+                8 => 'Agustus',
+                9 => 'September',
+                10 => 'Oktober',
+                11 => 'November',
+                12 => 'Desember',
+            ];
+        @endphp
         <form method="GET" action="{{ route('pilah-sampah.index') }}" class="mb-4">
             <div class="row g-3">
                 <div class="col-md-6">
@@ -63,27 +79,81 @@
                     <tr>
                         <td class="text-center">{{ $pilahSampahs->firstItem() + $index }}</td>
                         @php
-                            $bulanMap = [
-                                1 => 'Januari',
-                                2 => 'Februari',
-                                3 => 'Maret',
-                                4 => 'April',
-                                5 => 'Mei',
-                                6 => 'Juni',
-                                7 => 'Juli',
-                                8 => 'Agustus',
-                                9 => 'September',
-                                10 => 'Oktober',
-                                11 => 'November',
-                                12 => 'Desember',
-                            ];
-                            $bulanNo = $pilah->created_at?->month;
+                            $bulanNo = $pilah->bulan ?? $pilah->created_at?->month;
+                            $tahunVal = $pilah->tahun ?? $pilah->created_at?->year;
                         @endphp
                         <td>{{ $bulanMap[$bulanNo] ?? '-' }}</td>
-                        <td>{{ $pilah->created_at?->year ?? '-' }}</td>
+                        <td>{{ $tahunVal ?? '-' }}</td>
                         <td>
-                            <div class="fw-semibold">{{ $pilah->warga?->nama_lengkap ?: '-' }}</div>
-                            <div class="text-muted small">{{ $pilah->warga?->nik_masked ?: '-' }}</div>
+                            @php
+                                $warga = $pilah->warga;
+                                $displayNama = null;
+                                $displayNikRaw = null;
+
+                                if ($warga) {
+                                    $displayNama = $warga->nama_lengkap;
+                                    $displayNikRaw = $warga->getRawOriginal('nik');
+                                } else {
+                                    $combined = trim((string) ($pilah->kepala_keluarga_nik ?? ''));
+                                    if ($combined !== '') {
+                                        if (preg_match('/^(.*?)\s*\((.*?)\)\s*$/', $combined, $m)) {
+                                            $displayNama = trim($m[1]) !== '' ? trim($m[1]) : null;
+                                            $displayNikRaw = trim($m[2]) !== '' ? trim($m[2]) : null;
+                                        } else {
+                                            $displayNama = $combined;
+                                            $displayNikRaw = $combined;
+                                        }
+                                    }
+                                }
+
+                                if ($displayNama !== null && preg_match('/^\d+$/', $displayNama)) {
+                                    $displayNama = null;
+                                }
+
+                                $digits = preg_replace('/\D+/', '', (string) ($displayNikRaw ?? '')) ?? '';
+                                if ($digits === '' && $displayNikRaw !== null) {
+                                    $digits = '';
+                                }
+
+                                $nikMasked = '-';
+                                if ($digits !== '') {
+                                    $len = strlen($digits);
+                                    if ($len <= 4) {
+                                        $nikMasked = $digits;
+                                    } else {
+                                        $first4 = substr($digits, 0, 4);
+                                        $offset = 4;
+
+                                        $parts = [$first4];
+
+                                        if ($len > $offset) {
+                                            $take = min(2, $len - $offset);
+                                            $parts[] = substr($digits, $offset, $take);
+                                            $offset += $take;
+                                        }
+
+                                        if ($len > $offset) {
+                                            $take = min(3, $len - $offset);
+                                            $parts[] = substr($digits, $offset, $take);
+                                            $offset += $take;
+                                        }
+
+                                        if ($len > $offset + 4) {
+                                            $parts[] = substr($digits, $offset, $len - $offset - 4);
+                                        }
+
+                                        if ($len >= 8) {
+                                            $parts[] = substr($digits, -4);
+                                        }
+
+                                        $nikMasked = implode('*', array_values(array_filter($parts, fn ($p) => $p !== '')));
+                                    }
+                                } elseif ($displayNikRaw !== null && trim((string) $displayNikRaw) !== '') {
+                                    $nikMasked = trim((string) $displayNikRaw);
+                                }
+                            @endphp
+                            <div class="fw-semibold">{{ $displayNama ?? '-' }}</div>
+                            <span class="badge bg-light text-dark">{{ $nikMasked }}</span>
                         </td>
                         <td>{{ $pilah->jenis_sampah ?? '-' }}</td>
                         <td class="text-center">{{ number_format($pilah->berat, 0, ',', '.') }}</td>

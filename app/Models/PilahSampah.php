@@ -13,6 +13,10 @@ class PilahSampah extends Model
     protected $table = 'pilah_sampahs';
 
     protected $fillable = [
+        'kepala_keluarga_nama',
+        'kepala_keluarga_nik',
+        'bulan',
+        'tahun',
         'warga_id',
         'kecamatan',
         'kelurahan',
@@ -29,6 +33,8 @@ class PilahSampah extends Model
     ];
 
     protected $casts = [
+        'bulan' => 'integer',
+        'tahun' => 'integer',
         'berat' => 'decimal:2',
         'harga' => 'decimal:2',
         'sedekah' => 'boolean',

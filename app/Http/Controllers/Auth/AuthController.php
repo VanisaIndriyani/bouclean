@@ -12,11 +12,6 @@ use Illuminate\Support\Facades\Hash;
 
 class AuthController extends Controller
 {
-    private function normalizeNik(?string $nik): string
-    {
-        return preg_replace('/\D+/', '', (string) $nik) ?? '';
-    }
-
     public function showLoginForm()
     {
         return view('auth.login');
@@ -30,56 +25,38 @@ class AuthController extends Controller
     public function register(Request $request)
     {
         $request->validate([
-            'nik' => 'required|string|size:16',
             'name' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255|unique:users',
+            'username' => ['required', 'string', 'min:3', 'max:30', 'regex:/^[a-zA-Z0-9_.]+$/', 'unique:users,username'],
             'password' => 'required|string|min:8|confirmed',
         ]);
 
-        $nik = $this->normalizeNik($request->nik);
-        $warga = Warga::query()->where('nik', $nik)->first();
-        if (! $warga) {
-            return back()
-                ->withErrors(['nik' => 'NIK tidak ditemukan di data warga.'])
-                ->withInput();
-        }
-        if ($warga->account_user_id) {
-            return back()
-                ->withErrors(['nik' => 'NIK ini sudah punya akun.'])
-                ->withInput();
-        }
+        $username = strtolower(trim((string) $request->username));
+        $email = $username.'@bouclear.invalid';
 
         $user = User::create([
-            'name' => $request->name,
-            'email' => $request->email,
+            'name' => trim((string) $request->name),
+            'username' => $username,
+            'email' => $email,
             'password' => Hash::make($request->password),
-            'role' => 'warga',
+            'role' => 'user',
             'last_login_at' => null,
         ]);
 
-        $warga->forceFill(['account_user_id' => $user->id])->save();
-        Wilayah::query()->firstOrCreate([
-            'kecamatan' => $warga->kecamatan,
-            'kelurahan' => $warga->kelurahan,
-            'rt' => $warga->rt,
-            'rw' => $warga->rw,
-            'dasawisma' => $warga->dasawisma,
-        ], [
-            'nama_pengguna' => mb_strtoupper($warga->dasawisma),
-        ]);
-
         return redirect()->route('login')
-            ->with('success', 'Registrasi berhasil! Silakan login menggunakan email dan password yang sudah didaftarkan.');
+            ->with('success', 'Registrasi berhasil! Silakan login menggunakan username dan password yang sudah didaftarkan.');
     }
 
     public function login(Request $request)
     {
         $credentials = $request->validate([
-            'email' => 'required|email',
+            'username' => 'required|string',
             'password' => 'required',
         ]);
 
-        if (Auth::attempt($credentials)) {
+        $remember = $request->boolean('remember');
+        $credentials['username'] = strtolower(trim((string) $credentials['username']));
+
+        if (Auth::attempt($credentials, $remember)) {
             $request->session()->regenerate();
 
             $user = Auth::user();
@@ -106,7 +83,7 @@ class AuthController extends Controller
         }
 
         return back()->withErrors([
-            'email' => 'Email atau password salah.',
+            'username' => 'Username atau password salah.',
         ])->withInput();
     }
 

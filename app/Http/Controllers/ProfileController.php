@@ -22,14 +22,14 @@ class ProfileController extends Controller
 
         $request->validate([
             'name' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255|unique:users,email,'.$user->id,
+            'username' => ['required', 'string', 'min:3', 'max:30', 'regex:/^[a-zA-Z0-9_.]+$/', 'unique:users,username,'.$user->id],
             'avatar' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
             'current_password' => 'nullable|required_with:new_password',
             'new_password' => 'nullable|min:8|confirmed',
         ]);
 
-        $user->name = $request->name;
-        $user->email = $request->email;
+        $user->name = trim((string) $request->name);
+        $user->username = strtolower(trim((string) $request->username));
 
         if ($request->hasFile('avatar')) {
             if ($user->avatar) {

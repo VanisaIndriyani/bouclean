@@ -5,6 +5,7 @@ namespace Database\Seeders;
 use App\Models\User;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Schema;
 
 class UserSeeder extends Seeder
 {
@@ -21,5 +22,16 @@ class UserSeeder extends Seeder
             'password' => Hash::make('password'),
             'role' => 'user',
         ]);
+
+        if (Schema::hasColumn('users', 'username')) {
+            if (! $admin->username) {
+                $admin->username = 'admin';
+            }
+            if (! $user->username) {
+                $user->username = 'user';
+            }
+            $admin->save();
+            $user->save();
+        }
     }
 }
