@@ -115,9 +115,10 @@
                                         $wilayah->dasawisma,
                                     ]);
                                     $penggunaCount = $penggunaCountMap[$countKey] ?? 0;
+                                    $penggunaBadgeClass = $penggunaCount > 0 ? 'bg-warning text-dark' : 'bg-primary text-white';
                                 @endphp
                                 <button type="button" class="btn p-0 border-0 bg-transparent" data-bs-toggle="modal" data-bs-target="#penggunaWilayahModal{{ $wilayah->id }}">
-                                    <div class="d-inline-flex align-items-center justify-content-center rounded-3 bg-primary text-white"
+                                    <div class="d-inline-flex align-items-center justify-content-center rounded-3 {{ $penggunaBadgeClass }}"
                                          style="width: 44px; height: 32px; font-weight: 700;">
                                         {{ $penggunaCount }}
                                     </div>
@@ -213,7 +214,7 @@
                                                         @if($w->accountUser?->last_login_at)
                                                             {{ $w->accountUser->last_login_at->format('d/m/Y H:i') }}
                                                         @else
-                                                            <span class="text-muted">-</span>
+                                                            <span class="text-muted">Belum Pernah Login</span>
                                                         @endif
                                                     </td>
                                                     <td>

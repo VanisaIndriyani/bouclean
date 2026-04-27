@@ -58,8 +58,8 @@
                 </div>
 
                 <div class="col-md-6">
-                    <label class="form-label">Nama Pengguna <span class="text-danger">*</span></label>
-                    <input type="text" class="form-control @error('nama_pengguna') is-invalid @enderror" name="nama_pengguna" value="{{ old('nama_pengguna', $wilayah->nama_pengguna) }}" required>
+                    <label class="form-label">Nama Pengguna</label>
+                    <input type="text" class="form-control @error('nama_pengguna') is-invalid @enderror" name="nama_pengguna" value="{{ old('nama_pengguna', $wilayah->nama_pengguna) }}">
                     @error('nama_pengguna')
                         <div class="invalid-feedback">{{ $message }}</div>
                     @enderror

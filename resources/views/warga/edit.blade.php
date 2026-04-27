@@ -116,7 +116,7 @@
                 </div>
 
                 <div class="col-md-4">
-                    <label class="form-label">No Kartu Keluarga</label>
+                    <label class="form-label">Pilih Kepala Keluarga</label>
                     <input type="text" class="form-control @error('no_kk') is-invalid @enderror" name="no_kk" value="{{ old('no_kk', $warga->no_kk) }}">
                     @error('no_kk')
                         <div class="invalid-feedback">{{ $message }}</div>

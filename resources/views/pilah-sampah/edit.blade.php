@@ -20,6 +20,7 @@
                 <div class="col-md-6">
                     <label class="form-label">Kepala Keluarga (NIK) <span class="text-danger">*</span></label>
                     <input type="text" class="form-control @error('kepala_keluarga_nik') is-invalid @enderror" id="kepalaKeluargaNikInput" name="kepala_keluarga_nik" value="{{ old('kepala_keluarga_nik', $pilahSampah->warga ? ($pilahSampah->warga->nama_lengkap.' ('.$pilahSampah->warga->nik.')') : '') }}" list="wargaNikList" autocomplete="off" required placeholder="Ketik nama atau NIK, contoh: Anen (3374...)">
+                    <input type="hidden" name="warga_id" id="wargaIdInput" value="{{ old('warga_id', $pilahSampah->warga_id) }}">
                     <datalist id="wargaNikList"></datalist>
                     @error('kepala_keluarga_nik')
                         <div class="invalid-feedback">{{ $message }}</div>
@@ -151,10 +152,12 @@
     (function() {
         const input = document.getElementById('kepalaKeluargaNikInput');
         const list = document.getElementById('wargaNikList');
-        if (!input || !list) return;
+        const wargaIdInput = document.getElementById('wargaIdInput');
+        if (!input || !list || !wargaIdInput) return;
 
         const endpoint = @json(route('warga.lookup'));
         let timer = null;
+        let valueToId = new Map();
 
         function escapeHtml(value) {
             return String(value)
@@ -176,17 +179,25 @@
 
         input.addEventListener('input', function() {
             const q = input.value.trim();
+            wargaIdInput.value = '';
             if (timer) clearTimeout(timer);
             timer = setTimeout(async () => {
                 if (q.length < 2) {
+                    valueToId = new Map();
                     list.innerHTML = '';
                     return;
                 }
                 const options = await fetchOptions(q);
+                valueToId = new Map(options.map(o => [String(o.value ?? ''), String(o.id ?? '')]));
                 list.innerHTML = options
                     .map(o => `<option value="${escapeHtml(o.value ?? '')}"></option>`)
                     .join('');
             }, 250);
+        });
+
+        input.addEventListener('change', function () {
+            const id = valueToId.get(input.value) ?? '';
+            wargaIdInput.value = id;
         });
     })();
 

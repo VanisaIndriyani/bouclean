@@ -15,6 +15,21 @@ class PilahSampahController extends Controller
         return preg_replace('/\D+/', '', (string) $nik) ?? '';
     }
 
+    private function resolveWarga(Request $request, array $validated): ?Warga
+    {
+        $wargaId = $request->filled('warga_id') ? (int) $request->input('warga_id') : 0;
+        if ($wargaId > 0) {
+            return Warga::query()->find($wargaId);
+        }
+
+        $nik = $this->normalizeNik($validated['kepala_keluarga_nik'] ?? null);
+        if (strlen($nik) !== 16) {
+            return null;
+        }
+
+        return Warga::query()->where('nik', $nik)->first();
+    }
+
     public function index(Request $request)
     {
         $query = PilahSampah::with(['warga', 'user']);
@@ -50,6 +65,7 @@ class PilahSampahController extends Controller
     {
         $validated = $request->validate([
             'kepala_keluarga_nik' => 'required|string',
+            'warga_id' => 'nullable|integer',
             'kecamatan' => 'nullable|string|max:255',
             'kelurahan' => 'nullable|string|max:255',
             'rt' => 'nullable|string|max:3',
@@ -62,16 +78,10 @@ class PilahSampahController extends Controller
             'foto' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
         ]);
 
-        $nik = $this->normalizeNik($validated['kepala_keluarga_nik']);
-        if (strlen($nik) !== 16) {
-            return back()
-                ->withErrors(['kepala_keluarga_nik' => 'NIK harus 16 digit.'])
-                ->withInput();
-        }
-        $warga = Warga::query()->where('nik', $nik)->first();
+        $warga = $this->resolveWarga($request, $validated);
         if (! $warga) {
             return back()
-                ->withErrors(['kepala_keluarga_nik' => 'NIK tidak ditemukan.'])
+                ->withErrors(['kepala_keluarga_nik' => 'Pilih kepala keluarga dari daftar.'])
                 ->withInput();
         }
 
@@ -110,6 +120,7 @@ class PilahSampahController extends Controller
 
         $validated = $request->validate([
             'kepala_keluarga_nik' => 'required|string',
+            'warga_id' => 'nullable|integer',
             'kecamatan' => 'nullable|string|max:255',
             'kelurahan' => 'nullable|string|max:255',
             'rt' => 'nullable|string|max:3',
@@ -122,16 +133,10 @@ class PilahSampahController extends Controller
             'foto' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
         ]);
 
-        $nik = $this->normalizeNik($validated['kepala_keluarga_nik']);
-        if (strlen($nik) !== 16) {
-            return back()
-                ->withErrors(['kepala_keluarga_nik' => 'NIK harus 16 digit.'])
-                ->withInput();
-        }
-        $warga = Warga::query()->where('nik', $nik)->first();
+        $warga = $this->resolveWarga($request, $validated);
         if (! $warga) {
             return back()
-                ->withErrors(['kepala_keluarga_nik' => 'NIK tidak ditemukan.'])
+                ->withErrors(['kepala_keluarga_nik' => 'Pilih kepala keluarga dari daftar.'])
                 ->withInput();
         }
 

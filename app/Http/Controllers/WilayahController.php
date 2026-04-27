@@ -90,7 +90,7 @@ class WilayahController extends Controller
             $penggunaCountMap = Warga::query()
                 ->selectRaw('kecamatan, kelurahan, rt, rw, dasawisma, COUNT(*) as cnt')
                 ->whereNotNull('account_user_id')
-                ->whereHas('accountUser', fn ($q) => $q->whereNotNull('last_login_at'))
+                ->whereHas('accountUser', fn ($q) => $q->whereNull('last_login_at'))
                 ->when($kecamatans->count(), fn ($q) => $q->whereIn('kecamatan', $kecamatans))
                 ->when($kelurahans->count(), fn ($q) => $q->whereIn('kelurahan', $kelurahans))
                 ->when($rts->count(), fn ($q) => $q->whereIn('rt', $rts))
@@ -115,7 +115,7 @@ class WilayahController extends Controller
                 ->select(['id', 'nama_lengkap', 'nik', 'kecamatan', 'kelurahan', 'rt', 'rw', 'dasawisma', 'account_user_id'])
                 ->with(['accountUser:id,email,last_login_at'])
                 ->whereNotNull('account_user_id')
-                ->whereHas('accountUser', fn ($q) => $q->whereNotNull('last_login_at'))
+                ->whereHas('accountUser', fn ($q) => $q->whereNull('last_login_at'))
                 ->when($kecamatans->count(), fn ($q) => $q->whereIn('kecamatan', $kecamatans))
                 ->when($kelurahans->count(), fn ($q) => $q->whereIn('kelurahan', $kelurahans))
                 ->when($rts->count(), fn ($q) => $q->whereIn('rt', $rts))
@@ -153,8 +153,13 @@ class WilayahController extends Controller
             'rt' => 'required|string|size:3',
             'rw' => 'required|string|size:3',
             'dasawisma' => 'required|string|max:255',
-            'nama_pengguna' => 'required|string|max:255',
+            'nama_pengguna' => 'nullable|string|max:255',
         ]);
+
+        $validated['nama_pengguna'] = trim((string) ($validated['nama_pengguna'] ?? ''));
+        if ($validated['nama_pengguna'] === '') {
+            $validated['nama_pengguna'] = mb_strtoupper((string) $validated['dasawisma']);
+        }
 
         Wilayah::create($validated);
 
@@ -174,8 +179,13 @@ class WilayahController extends Controller
             'rt' => 'required|string|size:3',
             'rw' => 'required|string|size:3',
             'dasawisma' => 'required|string|max:255',
-            'nama_pengguna' => 'required|string|max:255',
+            'nama_pengguna' => 'nullable|string|max:255',
         ]);
+
+        $validated['nama_pengguna'] = trim((string) ($validated['nama_pengguna'] ?? ''));
+        if ($validated['nama_pengguna'] === '') {
+            $validated['nama_pengguna'] = mb_strtoupper((string) $validated['dasawisma']);
+        }
 
         $wilayah->update($validated);
 
