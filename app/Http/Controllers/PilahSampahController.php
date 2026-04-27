@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\PilahSampah;
+use App\Models\Warga;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
@@ -34,7 +35,38 @@ class PilahSampahController extends Controller
 
         $pilahSampahs = $query->orderBy('created_at', 'desc')->paginate(10);
 
-        return view('pilah-sampah.index', compact('pilahSampahs'));
+        $extractNik = function (?string $value): ?string {
+            $value = trim((string) $value);
+            if ($value === '') {
+                return null;
+            }
+            if (preg_match('/(\d{16})/', $value, $m)) {
+                return $m[1];
+            }
+            $digits = preg_replace('/\D+/', '', $value) ?? '';
+            return $digits !== '' ? $digits : null;
+        };
+
+        $niks = $pilahSampahs->getCollection()
+            ->map(function ($pilah) use ($extractNik) {
+                $wargaNik = $pilah->warga ? (string) $pilah->warga->getRawOriginal('nik') : null;
+                return $extractNik($wargaNik) ?? $extractNik((string) ($pilah->kepala_keluarga_nik ?? ''));
+            })
+            ->filter()
+            ->unique()
+            ->values()
+            ->all();
+
+        $wargaByNik = collect();
+        if (! empty($niks)) {
+            $wargaByNik = Warga::query()
+                ->select(['nik', 'nama_lengkap', 'no_kk'])
+                ->whereIn('nik', $niks)
+                ->get()
+                ->keyBy('nik');
+        }
+
+        return view('pilah-sampah.index', compact('pilahSampahs', 'wargaByNik'));
     }
 
     public function create()

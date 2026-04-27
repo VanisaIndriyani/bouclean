@@ -56,13 +56,15 @@
         </div>
 
         <div class="table-responsive overflow-auto">
-            <table class="table table-hover align-middle text-nowrap" style="min-width: 1100px;">
+            <table class="table table-hover align-middle text-nowrap" style="min-width: 1250px;">
                 <thead>
                     <tr>
                         <th width="50">No</th>
                         <th>Bulan</th>
                         <th>Tahun</th>
-                        <th>Kepala Keluarga</th>
+                        <th>Nama</th>
+                        <th>No NIK</th>
+                        <th>No KK</th>
                         <th>Jenis Sampah</th>
                         <th class="text-center">
                             <div class="fw-semibold">BERAT</div>
@@ -84,77 +86,89 @@
                         @endphp
                         <td>{{ $bulanMap[$bulanNo] ?? '-' }}</td>
                         <td>{{ $tahunVal ?? '-' }}</td>
-                        <td>
-                            @php
-                                $warga = $pilah->warga;
-                                $displayNama = null;
-                                $displayNikRaw = null;
+                        @php
+                            $warga = $pilah->warga;
 
-                                if ($warga) {
-                                    $displayNama = $warga->nama_lengkap;
-                                    $displayNikRaw = $warga->getRawOriginal('nik');
-                                } else {
-                                    $combined = trim((string) ($pilah->kepala_keluarga_nik ?? ''));
-                                    if ($combined !== '') {
-                                        if (preg_match('/^(.*?)\s*\((.*?)\)\s*$/', $combined, $m)) {
-                                            $displayNama = trim($m[1]) !== '' ? trim($m[1]) : null;
-                                            $displayNikRaw = trim($m[2]) !== '' ? trim($m[2]) : null;
-                                        } else {
-                                            $displayNama = $combined;
-                                            $displayNikRaw = $combined;
-                                        }
-                                    }
-                                }
+                            $combined = trim((string) ($pilah->kepala_keluarga_nik ?? ''));
+                            $displayNikRaw = $warga ? (string) $warga->getRawOriginal('nik') : ($combined !== '' ? $combined : null);
 
-                                if ($displayNama !== null && preg_match('/^\d+$/', $displayNama)) {
-                                    $displayNama = null;
-                                }
+                            $digits = preg_replace('/\D+/', '', (string) ($displayNikRaw ?? '')) ?? '';
+                            if (preg_match('/(\d{16})/', (string) ($displayNikRaw ?? ''), $m)) {
+                                $digits = $m[1];
+                            }
 
-                                $digits = preg_replace('/\D+/', '', (string) ($displayNikRaw ?? '')) ?? '';
-                                if ($digits === '' && $displayNikRaw !== null) {
-                                    $digits = '';
-                                }
+                            $wargaMatch = null;
+                            if (($digits ?? '') !== '' && isset($wargaByNik) && $wargaByNik instanceof \Illuminate\Support\Collection) {
+                                $wargaMatch = $wargaByNik->get($digits);
+                            }
 
-                                $nikMasked = '-';
-                                if ($digits !== '') {
-                                    $len = strlen($digits);
-                                    if ($len <= 4) {
-                                        $nikMasked = $digits;
+                            $displayNama = null;
+                            if ($warga) {
+                                $displayNama = $warga->nama_lengkap;
+                            } elseif ($wargaMatch) {
+                                $displayNama = $wargaMatch->nama_lengkap;
+                            } else {
+                                if ($combined !== '' && $digits !== '' && str_contains($combined, $digits)) {
+                                    $nameCandidate = trim(str_replace($digits, '', $combined));
+                                    $nameCandidate = preg_replace('/[()]/', ' ', $nameCandidate) ?? $nameCandidate;
+                                    $nameCandidate = preg_replace('/\s+/', ' ', $nameCandidate) ?? $nameCandidate;
+                                    $displayNama = trim((string) $nameCandidate) !== '' ? trim((string) $nameCandidate) : null;
+                                } elseif ($combined !== '') {
+                                    if (preg_match('/^(.*?)\s*\((.*?)\)\s*$/', $combined, $m2)) {
+                                        $displayNama = trim($m2[1]) !== '' ? trim($m2[1]) : null;
                                     } else {
-                                        $first4 = substr($digits, 0, 4);
-                                        $offset = 4;
-
-                                        $parts = [$first4];
-
-                                        if ($len > $offset) {
-                                            $take = min(2, $len - $offset);
-                                            $parts[] = substr($digits, $offset, $take);
-                                            $offset += $take;
-                                        }
-
-                                        if ($len > $offset) {
-                                            $take = min(3, $len - $offset);
-                                            $parts[] = substr($digits, $offset, $take);
-                                            $offset += $take;
-                                        }
-
-                                        if ($len > $offset + 4) {
-                                            $parts[] = substr($digits, $offset, $len - $offset - 4);
-                                        }
-
-                                        if ($len >= 8) {
-                                            $parts[] = substr($digits, -4);
-                                        }
-
-                                        $nikMasked = implode('*', array_values(array_filter($parts, fn ($p) => $p !== '')));
+                                        $displayNama = preg_match('/^\d+$/', $combined) ? null : $combined;
                                     }
-                                } elseif ($displayNikRaw !== null && trim((string) $displayNikRaw) !== '') {
-                                    $nikMasked = trim((string) $displayNikRaw);
                                 }
-                            @endphp
-                            <div class="fw-semibold">{{ $displayNama ?? '-' }}</div>
-                            <span class="badge bg-light text-dark">{{ $nikMasked }}</span>
-                        </td>
+                            }
+
+                            $nikMasked = '-';
+                            if (($digits ?? '') !== '') {
+                                $len = strlen($digits);
+                                if ($len <= 4) {
+                                    $nikMasked = $digits;
+                                } else {
+                                    $first4 = substr($digits, 0, 4);
+                                    $offset = 4;
+
+                                    $parts = [$first4];
+
+                                    if ($len > $offset) {
+                                        $take = min(2, $len - $offset);
+                                        $parts[] = substr($digits, $offset, $take);
+                                        $offset += $take;
+                                    }
+
+                                    if ($len > $offset) {
+                                        $take = min(3, $len - $offset);
+                                        $parts[] = substr($digits, $offset, $take);
+                                        $offset += $take;
+                                    }
+
+                                    if ($len > $offset + 4) {
+                                        $parts[] = substr($digits, $offset, $len - $offset - 4);
+                                    }
+
+                                    if ($len >= 8) {
+                                        $parts[] = substr($digits, -4);
+                                    }
+
+                                    $nikMasked = implode('*', array_values(array_filter($parts, fn ($p) => $p !== '')));
+                                }
+                            } elseif ($displayNikRaw !== null && trim((string) $displayNikRaw) !== '') {
+                                $nikMasked = trim((string) $displayNikRaw);
+                            }
+
+                            $noKk = '-';
+                            if ($warga && ($warga->no_kk ?? '') !== '') {
+                                $noKk = $warga->no_kk;
+                            } elseif ($wargaMatch && ($wargaMatch->no_kk ?? '') !== '') {
+                                $noKk = $wargaMatch->no_kk;
+                            }
+                        @endphp
+                        <td class="fw-semibold">{{ $displayNama ?? '-' }}</td>
+                        <td><span class="badge bg-light text-dark">{{ $nikMasked }}</span></td>
+                        <td>{{ $noKk }}</td>
                         <td>{{ $pilah->jenis_sampah ?? '-' }}</td>
                         <td class="text-center">{{ number_format($pilah->berat, 0, ',', '.') }}</td>
                         <td>
@@ -193,7 +207,7 @@
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="10" class="text-center py-4">
+                        <td colspan="12" class="text-center py-4">
                             <div class="text-muted">
                                 <i class="bi bi-inbox fs-1 d-block mb-2"></i>
                                 <strong>Belum ada data pilah sampah</strong>
