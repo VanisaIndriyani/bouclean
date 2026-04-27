@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\Validator;
 
 class UserController extends Controller
 {
@@ -88,13 +89,22 @@ class UserController extends Controller
                 ->withInput();
         }
 
-        $validated = $request->validate([
+        $validator = Validator::make($request->all(), [
             'name' => 'required|string|max:255',
             'dasawisma' => 'required|array|min:1',
             'dasawisma.*' => 'required|string|max:255',
             'username' => ['required', 'string', 'min:3', 'max:30', 'regex:/^[a-zA-Z0-9_.]+$/', 'unique:users,username'],
             'password' => 'required|string|min:8|confirmed',
         ]);
+
+        if ($validator->fails()) {
+            return back()
+                ->withErrors($validator)
+                ->withInput()
+                ->with('open_user_modal', 'create');
+        }
+
+        $validated = $validator->validated();
 
         $username = strtolower(trim((string) $validated['username']));
         $dasawisma = collect($validated['dasawisma'])
@@ -129,12 +139,21 @@ class UserController extends Controller
                 ->withInput();
         }
 
-        $validated = $request->validate([
+        $validator = Validator::make($request->all(), [
             'name' => 'required|string|max:255',
             'username' => ['required', 'string', 'min:3', 'max:30', 'regex:/^[a-zA-Z0-9_.]+$/', 'unique:users,username,'.$user->id],
             'dasawisma' => 'nullable|array',
             'dasawisma.*' => 'required|string|max:255',
         ]);
+
+        if ($validator->fails()) {
+            return back()
+                ->withErrors($validator)
+                ->withInput()
+                ->with('open_user_modal', (string) $user->id);
+        }
+
+        $validated = $validator->validated();
 
         $dasawisma = collect($validated['dasawisma'] ?? [])
             ->map(fn ($d) => trim((string) $d))

@@ -109,14 +109,14 @@
                     <div class="row g-3">
                         <div class="col-md-6">
                             <label class="form-label">Nama</label>
-                            <input type="text" class="form-control @error('name') is-invalid @enderror" name="name" value="{{ old('name') }}" required placeholder="Nama petugas">
+                            <input type="text" class="form-control @error('name') is-invalid @enderror" name="name" value="{{ session('open_user_modal') === 'create' ? old('name') : '' }}" required placeholder="Nama petugas">
                             @error('name')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
                         </div>
                         <div class="col-md-6">
                             <label class="form-label">Username</label>
-                            <input type="text" class="form-control @error('username') is-invalid @enderror" name="username" value="{{ old('username') }}" required placeholder="contoh: fendi_01">
+                            <input type="text" class="form-control @error('username') is-invalid @enderror" name="username" value="{{ session('open_user_modal') === 'create' ? old('username') : '' }}" required placeholder="contoh: fendi_01">
                             @error('username')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
@@ -125,7 +125,7 @@
                             <label class="form-label">Dasawisma</label>
                             @php
                                 $dasawismaInvalid = $errors->has('dasawisma') || $errors->has('dasawisma.*');
-                                $oldDasawisma = (array) old('dasawisma', []);
+                                $oldDasawisma = session('open_user_modal') === 'create' ? (array) old('dasawisma', []) : [];
                             @endphp
                             <div class="border rounded p-2 {{ $dasawismaInvalid ? 'border-danger' : '' }}" style="max-height: 140px; overflow: auto;">
                                 @forelse(($dasawismaOptions ?? collect()) as $opt)
@@ -205,11 +205,21 @@
                         <div class="row g-3">
                             <div class="col-md-6">
                                 <label class="form-label">Nama</label>
-                                <input type="text" class="form-control" name="name" value="{{ $u->name }}" required>
+                                <input type="text" class="form-control @error('name') is-invalid @enderror" name="name" value="{{ session('open_user_modal') == (string) $u->id ? old('name', $u->name) : $u->name }}" required>
+                                @if(session('open_user_modal') == (string) $u->id)
+                                    @error('name')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
+                                @endif
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label">Username</label>
-                                <input type="text" class="form-control" name="username" value="{{ $u->username }}" required>
+                                <input type="text" class="form-control @error('username') is-invalid @enderror" name="username" value="{{ session('open_user_modal') == (string) $u->id ? old('username', $u->username) : $u->username }}" required>
+                                @if(session('open_user_modal') == (string) $u->id)
+                                    @error('username')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
+                                @endif
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label">Dasawisma</label>
@@ -219,8 +229,13 @@
                                         ->filter(fn ($d) => $d !== '')
                                         ->values()
                                         ->all();
+                                    $editDasawismaInvalid = session('open_user_modal') == (string) $u->id
+                                        && ($errors->has('dasawisma') || $errors->has('dasawisma.*'));
+                                    $editDasawismaSelected = session('open_user_modal') == (string) $u->id
+                                        ? (array) old('dasawisma', $selectedDasawisma)
+                                        : $selectedDasawisma;
                                 @endphp
-                                <div class="border rounded p-2" style="max-height: 140px; overflow: auto;">
+                                <div class="border rounded p-2 {{ $editDasawismaInvalid ? 'border-danger' : '' }}" style="max-height: 140px; overflow: auto;">
                                     @forelse(($dasawismaOptions ?? collect()) as $opt)
                                         <div class="form-check">
                                             <input
@@ -229,7 +244,7 @@
                                                 name="dasawisma[]"
                                                 id="editDasawisma{{ $u->id }}_{{ $loop->index }}"
                                                 value="{{ $opt }}"
-                                                {{ in_array($opt, $selectedDasawisma, true) ? 'checked' : '' }}
+                                                {{ in_array($opt, $editDasawismaSelected, true) ? 'checked' : '' }}
                                                 {{ $u->role === 'admin' ? 'disabled' : '' }}
                                             >
                                             <label class="form-check-label" for="editDasawisma{{ $u->id }}_{{ $loop->index }}">{{ $opt }}</label>
@@ -238,6 +253,14 @@
                                         <div class="text-muted small">Belum ada data dasawisma.</div>
                                     @endforelse
                                 </div>
+                                @if(session('open_user_modal') == (string) $u->id)
+                                    @error('dasawisma')
+                                        <div class="invalid-feedback d-block">{{ $message }}</div>
+                                    @enderror
+                                    @error('dasawisma.*')
+                                        <div class="invalid-feedback d-block">{{ $message }}</div>
+                                    @enderror
+                                @endif
                             </div>
                         </div>
                     </div>
@@ -286,5 +309,16 @@
 
     toggleField('toggleCreatePassword', 'createPassword', 'toggleCreatePasswordIcon');
     toggleField('toggleCreatePasswordConfirmation', 'createPasswordConfirmation', 'toggleCreatePasswordConfirmationIcon');
+
+    (function () {
+        const openModal = @json(session('open_user_modal'));
+        if (!openModal) return;
+
+        const modalId = openModal === 'create' ? 'userCreateModal' : `userEditModal${openModal}`;
+        const el = document.getElementById(modalId);
+        if (!el) return;
+        const modal = bootstrap.Modal.getOrCreateInstance(el);
+        modal.show();
+    })();
 </script>
 @endpush
