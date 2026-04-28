@@ -38,7 +38,7 @@
                         <span class="input-group-text bg-white">
                             <i class="bi bi-search text-muted"></i>
                         </span>
-                        <input type="text" class="form-control" name="search" placeholder="Cari nama, NIK, atau wilayah..." value="{{ request('search') }}">
+                        <input type="text" class="form-control" name="search" placeholder="Cari nama, NIK/No KK, atau wilayah..." value="{{ request('search') }}">
                     </div>
                 </div>
                 <div class="col-md-4">
@@ -96,8 +96,12 @@
                             }
 
                             $wargaMatch = null;
-                            if (($digits ?? '') !== '' && isset($wargaByNik) && $wargaByNik instanceof \Illuminate\Support\Collection) {
-                                $wargaMatch = $wargaByNik->get($digits);
+                            if (! $warga && ($digits ?? '') !== '') {
+                                if (strlen($digits) === 16 && isset($wargaByNik) && $wargaByNik instanceof \Illuminate\Support\Collection) {
+                                    $wargaMatch = $wargaByNik->get($digits);
+                                } elseif (isset($wargaByKk) && $wargaByKk instanceof \Illuminate\Support\Collection) {
+                                    $wargaMatch = $wargaByKk->get($digits);
+                                }
                             }
 
                             $displayNama = null;
@@ -121,40 +125,18 @@
                             }
 
                             $nikMasked = '-';
-                            if (($digits ?? '') !== '') {
-                                $len = strlen($digits);
-                                if ($len <= 4) {
-                                    $nikMasked = $digits;
-                                } else {
-                                    $first4 = substr($digits, 0, 4);
-                                    $offset = 4;
+                            $nikRaw = null;
+                            if ($warga) {
+                                $nikRaw = (string) $warga->getRawOriginal('nik');
+                            } elseif ($wargaMatch) {
+                                $nikRaw = (string) ($wargaMatch->getRawOriginal('nik') ?? $wargaMatch->nik);
+                            } elseif (($digits ?? '') !== '' && strlen($digits) === 16) {
+                                $nikRaw = $digits;
+                            }
 
-                                    $parts = [$first4];
-
-                                    if ($len > $offset) {
-                                        $take = min(2, $len - $offset);
-                                        $parts[] = substr($digits, $offset, $take);
-                                        $offset += $take;
-                                    }
-
-                                    if ($len > $offset) {
-                                        $take = min(3, $len - $offset);
-                                        $parts[] = substr($digits, $offset, $take);
-                                        $offset += $take;
-                                    }
-
-                                    if ($len > $offset + 4) {
-                                        $parts[] = substr($digits, $offset, $len - $offset - 4);
-                                    }
-
-                                    if ($len >= 8) {
-                                        $parts[] = substr($digits, -4);
-                                    }
-
-                                    $nikMasked = implode('*', array_values(array_filter($parts, fn ($p) => $p !== '')));
-                                }
-                            } elseif ($displayNikRaw !== null && trim((string) $displayNikRaw) !== '') {
-                                $nikMasked = trim((string) $displayNikRaw);
+                            $nikDigits = $nikRaw !== null ? (preg_replace('/\D+/', '', (string) $nikRaw) ?? '') : '';
+                            if ($nikDigits !== '' && strlen($nikDigits) === 16) {
+                                $nikMasked = substr($nikDigits, 0, 4).'*'.substr($nikDigits, 4, 2).'*'.substr($nikDigits, 6, 3).'*'.substr($nikDigits, -4);
                             }
                         @endphp
                         <td>

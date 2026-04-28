@@ -17,25 +17,51 @@ class WargaController extends Controller
         }
 
         $digits = preg_replace('/\D+/', '', $q) ?? '';
+        $mode = (string) $request->query('mode', '');
 
-        $rows = Warga::query()
-            ->select(['id', 'nama_lengkap', 'nik'])
-            ->where(function ($w) use ($q, $digits) {
+        $query = Warga::query();
+        if ($mode === 'kk') {
+            $query->select(['id', 'nama_lengkap', 'nik', 'no_kk'])
+                ;
+        } else {
+            $query->select(['id', 'nama_lengkap', 'nik']);
+        }
+
+        $rows = $query
+            ->where(function ($w) use ($q, $digits, $mode) {
                 $w->where('nama_lengkap', 'like', "%{$q}%");
 
                 if ($digits !== '') {
                     $w->orWhere('nik', 'like', "%{$digits}%");
+                    if ($mode === 'kk') {
+                        $w->orWhere('no_kk', 'like', "%{$digits}%");
+                    }
                 } else {
                     $w->orWhere('nik', 'like', "%{$q}%");
+                    if ($mode === 'kk') {
+                        $w->orWhere('no_kk', 'like', "%{$q}%");
+                    }
                 }
             })
             ->orderBy('nama_lengkap')
             ->limit(10)
             ->get()
-            ->map(fn (Warga $w) => [
-                'id' => $w->id,
-                'value' => $w->nama_lengkap.' ('.$w->nik.')',
-            ])
+            ->map(function (Warga $w) use ($mode) {
+                if ($mode === 'kk') {
+                    $noKk = trim((string) ($w->no_kk ?? ''));
+                    $label = $w->nama_lengkap.' ('.($noKk !== '' ? $noKk : $w->nik).')';
+                    return [
+                        'id' => $w->id,
+                        'value' => $label,
+                        'label' => $label,
+                    ];
+                }
+
+                return [
+                    'id' => $w->id,
+                    'value' => $w->nama_lengkap.' ('.$w->nik.')',
+                ];
+            })
             ->values();
 
         return response()->json($rows);

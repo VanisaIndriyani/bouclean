@@ -22,7 +22,8 @@ class PilahSampahController extends Controller
                     ->orWhere('kepala_keluarga_nik', 'like', "%{$search}%")
                     ->orWhereHas('warga', function ($wargaQuery) use ($search) {
                         $wargaQuery->where('nama_lengkap', 'like', "%{$search}%")
-                            ->orWhere('nik', 'like', "%{$search}%");
+                            ->orWhere('nik', 'like', "%{$search}%")
+                            ->orWhere('no_kk', 'like', "%{$search}%");
                     })
                     ->orWhere('kecamatan', 'like', "%{$search}%")
                     ->orWhere('kelurahan', 'like', "%{$search}%")
@@ -35,7 +36,7 @@ class PilahSampahController extends Controller
 
         $pilahSampahs = $query->orderBy('created_at', 'desc')->paginate(10);
 
-        $extractNik = function (?string $value): ?string {
+        $extractDigits = function (?string $value): ?string {
             $value = trim((string) $value);
             if ($value === '') {
                 return null;
@@ -47,18 +48,40 @@ class PilahSampahController extends Controller
             return $digits !== '' ? $digits : null;
         };
 
-        $niks = $pilahSampahs->getCollection()
-            ->map(function ($pilah) use ($extractNik) {
-                $wargaNik = $pilah->warga ? (string) $pilah->warga->getRawOriginal('nik') : null;
-                return $extractNik($wargaNik) ?? $extractNik((string) ($pilah->kepala_keluarga_nik ?? ''));
+        $tokens = $pilahSampahs->getCollection()
+            ->map(function ($pilah) use ($extractDigits) {
+                if ($pilah->warga) {
+                    $wargaNik = (string) $pilah->warga->getRawOriginal('nik');
+                    $digits = $extractDigits($wargaNik);
+                    return $digits !== null ? ['type' => 'nik', 'value' => $digits] : null;
+                }
+
+                $raw = (string) ($pilah->kepala_keluarga_nik ?? '');
+                $digits = $extractDigits($raw);
+                if ($digits === null) {
+                    return null;
+                }
+                return strlen($digits) === 16 ? ['type' => 'nik', 'value' => $digits] : ['type' => 'kk', 'value' => $digits];
             })
             ->filter()
+            ->all();
+
+        $niks = collect($tokens)
+            ->where('type', 'nik')
+            ->pluck('value')
+            ->unique()
+            ->values()
+            ->all();
+
+        $kks = collect($tokens)
+            ->where('type', 'kk')
+            ->pluck('value')
             ->unique()
             ->values()
             ->all();
 
         $wargaByNik = collect();
-        if (! empty($niks)) {
+        if (!empty($niks)) {
             $wargaByNik = Warga::query()
                 ->select(['nik', 'nama_lengkap'])
                 ->whereIn('nik', $niks)
@@ -66,7 +89,27 @@ class PilahSampahController extends Controller
                 ->keyBy('nik');
         }
 
-        return view('pilah-sampah.index', compact('pilahSampahs', 'wargaByNik'));
+        $wargaByKk = collect();
+        if (!empty($kks)) {
+            $wargaKkRows = Warga::query()
+                ->select(['no_kk', 'nik', 'nama_lengkap'])
+                ->whereNotNull('no_kk')
+                ->where('no_kk', '!=', '')
+                ->where(function ($q) use ($kks) {
+                    foreach ($kks as $kk) {
+                        $q->orWhere('no_kk', 'like', '%'.$kk.'%');
+                    }
+                })
+                ->get();
+
+            $wargaByKk = $wargaKkRows
+                ->mapWithKeys(function (Warga $w) {
+                    $digits = preg_replace('/\D+/', '', (string) ($w->no_kk ?? '')) ?? '';
+                    return $digits !== '' ? [$digits => $w] : [];
+                });
+        }
+
+        return view('pilah-sampah.index', compact('pilahSampahs', 'wargaByNik', 'wargaByKk'));
     }
 
     public function create()
@@ -94,7 +137,9 @@ class PilahSampahController extends Controller
 
         $validated['user_id'] = Auth::id();
 
-        $validated['kepala_keluarga_nik'] = trim((string) ($validated['kepala_keluarga_nik'] ?? ''));
+        $inputKkOrNik = trim((string) ($validated['kepala_keluarga_nik'] ?? ''));
+        $digits = preg_replace('/\D+/', '', $inputKkOrNik) ?? '';
+        $validated['kepala_keluarga_nik'] = $digits !== '' ? $digits : $inputKkOrNik;
         $validated['kepala_keluarga_nama'] = null;
 
         $validated['jenis_kelamin'] = null;
@@ -103,6 +148,30 @@ class PilahSampahController extends Controller
         foreach (['kecamatan', 'kelurahan', 'rt', 'rw', 'dasawisma', 'jenis_sampah'] as $field) {
             $value = array_key_exists($field, $validated) ? trim((string) $validated[$field]) : '';
             $validated[$field] = $value === '' ? null : $value;
+        }
+
+        $nikCandidate = null;
+        if (preg_match('/(\d{16})/', $inputKkOrNik, $m)) {
+            $nikCandidate = $m[1];
+        } elseif (strlen($digits) === 16) {
+            $nikCandidate = $digits;
+        }
+
+        $warga = Warga::query()
+            ->where(function ($q) use ($inputKkOrNik, $digits) {
+                $q->where('no_kk', $inputKkOrNik);
+                if ($digits !== '' && $digits !== $inputKkOrNik) {
+                    $q->orWhere('no_kk', $digits)->orWhere('no_kk', 'like', '%'.$digits.'%');
+                }
+            })
+            ->when($nikCandidate !== null, function ($q) use ($nikCandidate) {
+                $q->orWhere('nik', $nikCandidate);
+            })
+            ->first();
+
+        if ($warga) {
+            $validated['warga_id'] = $warga->id;
+            $validated['kepala_keluarga_nik'] = (string) $warga->getRawOriginal('nik');
         }
 
         if ($request->hasFile('foto')) {
@@ -117,6 +186,7 @@ class PilahSampahController extends Controller
     public function edit(PilahSampah $pilah_sampah)
     {
         $pilahSampah = $pilah_sampah;
+        $pilahSampah->load('warga');
 
         return view('pilah-sampah.edit', compact('pilahSampah'));
     }
@@ -141,7 +211,9 @@ class PilahSampahController extends Controller
             'foto' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
         ]);
 
-        $validated['kepala_keluarga_nik'] = trim((string) ($validated['kepala_keluarga_nik'] ?? ''));
+        $inputKkOrNik = trim((string) ($validated['kepala_keluarga_nik'] ?? ''));
+        $digits = preg_replace('/\D+/', '', $inputKkOrNik) ?? '';
+        $validated['kepala_keluarga_nik'] = $digits !== '' ? $digits : $inputKkOrNik;
         $validated['kepala_keluarga_nama'] = null;
 
         $validated['jenis_kelamin'] = null;
@@ -150,6 +222,30 @@ class PilahSampahController extends Controller
         foreach (['kecamatan', 'kelurahan', 'rt', 'rw', 'dasawisma', 'jenis_sampah'] as $field) {
             $value = array_key_exists($field, $validated) ? trim((string) $validated[$field]) : '';
             $validated[$field] = $value === '' ? null : $value;
+        }
+
+        $nikCandidate = null;
+        if (preg_match('/(\d{16})/', $inputKkOrNik, $m)) {
+            $nikCandidate = $m[1];
+        } elseif (strlen($digits) === 16) {
+            $nikCandidate = $digits;
+        }
+
+        $warga = Warga::query()
+            ->where(function ($q) use ($inputKkOrNik, $digits) {
+                $q->where('no_kk', $inputKkOrNik);
+                if ($digits !== '' && $digits !== $inputKkOrNik) {
+                    $q->orWhere('no_kk', $digits)->orWhere('no_kk', 'like', '%'.$digits.'%');
+                }
+            })
+            ->when($nikCandidate !== null, function ($q) use ($nikCandidate) {
+                $q->orWhere('nik', $nikCandidate);
+            })
+            ->first();
+
+        if ($warga) {
+            $validated['warga_id'] = $warga->id;
+            $validated['kepala_keluarga_nik'] = (string) $warga->getRawOriginal('nik');
         }
 
         if ($request->hasFile('foto')) {

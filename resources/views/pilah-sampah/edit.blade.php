@@ -34,8 +34,9 @@
 
             <div class="row g-4">
                 <div class="col-md-4">
-                    <label class="form-label">Kepala Keluarga (NIK)</label>
-                    <input type="text" class="form-control @error('kepala_keluarga_nik') is-invalid @enderror" name="kepala_keluarga_nik" value="{{ old('kepala_keluarga_nik', $pilahSampah->kepala_keluarga_nik ?? $pilahSampah->warga?->getRawOriginal('nik')) }}" required>
+                    <label class="form-label">Pilih Kepala Keluarga (No KK)</label>
+                    <input type="text" class="form-control @error('kepala_keluarga_nik') is-invalid @enderror" id="pilahKkInput" name="kepala_keluarga_nik" value="{{ old('kepala_keluarga_nik', $pilahSampah->warga?->no_kk ?? $pilahSampah->kepala_keluarga_nik) }}" list="pilahKkList" autocomplete="off" required placeholder="Ketik nama atau No KK">
+                    <datalist id="pilahKkList"></datalist>
                     @error('kepala_keluarga_nik')
                         <div class="invalid-feedback">{{ $message }}</div>
                     @enderror
@@ -187,6 +188,48 @@
 
 @push('scripts')
 <script>
+    (function() {
+        const input = document.getElementById('pilahKkInput');
+        const list = document.getElementById('pilahKkList');
+        if (!input || !list) return;
+
+        const endpoint = @json(route('warga.lookup'));
+        let timer = null;
+
+        function escapeHtml(value) {
+            return String(value)
+                .replaceAll('&', '&amp;')
+                .replaceAll('<', '&lt;')
+                .replaceAll('>', '&gt;')
+                .replaceAll('"', '&quot;')
+                .replaceAll("'", '&#039;');
+        }
+
+        async function fetchOptions(q) {
+            const res = await fetch(`${endpoint}?mode=kk&q=${encodeURIComponent(q)}`, {
+                headers: { 'Accept': 'application/json' }
+            });
+            if (!res.ok) return [];
+            const data = await res.json();
+            return Array.isArray(data) ? data : [];
+        }
+
+        input.addEventListener('input', function() {
+            const q = input.value.trim();
+            if (timer) clearTimeout(timer);
+            timer = setTimeout(async () => {
+                if (q.length < 2) {
+                    list.innerHTML = '';
+                    return;
+                }
+                const options = await fetchOptions(q);
+                list.innerHTML = options
+                    .map(o => `<option value="${escapeHtml(o.value ?? '')}">${escapeHtml(o.label ?? '')}</option>`)
+                    .join('');
+            }, 250);
+        });
+    })();
+
     document.getElementById('fotoPickBtn').addEventListener('click', function() {
         document.getElementById('fotoInput').click();
     });

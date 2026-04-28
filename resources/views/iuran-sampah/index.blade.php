@@ -45,7 +45,7 @@
                         <span class="input-group-text bg-white">
                             <i class="bi bi-search text-muted"></i>
                         </span>
-                        <input type="text" class="form-control" name="search" placeholder="Cari nama/NIK/petugas..." value="{{ request('search') }}">
+                        <input type="text" class="form-control" name="search" placeholder="Cari nama/NIK/No KK/petugas..." value="{{ request('search') }}">
                     </div>
                 </div>
                 <div class="col-md-2">
@@ -81,11 +81,49 @@
                     <tr>
                         <td class="text-center">{{ $iuranSampahs->firstItem() + $index }}</td>
                         <td>
-                            @if($iuran->warga)
-                                <strong>{{ $iuran->warga->nama_lengkap }}</strong><br>
-                                <small class="text-muted">{{ $iuran->warga->nik_masked }}</small>
+                            @php
+                                $warga = $iuran->warga;
+
+                                $raw = trim((string) ($iuran->nik ?? ''));
+                                $digits = preg_replace('/\D+/', '', $raw) ?? '';
+                                $nik16 = null;
+                                if (preg_match('/(\d{16})/', $raw, $m)) {
+                                    $nik16 = $m[1];
+                                } elseif (strlen($digits) === 16) {
+                                    $nik16 = $digits;
+                                }
+
+                                $wargaMatch = null;
+                                if (!$warga) {
+                                    if ($nik16 !== null && isset($wargaByNik) && $wargaByNik instanceof \Illuminate\Support\Collection) {
+                                        $wargaMatch = $wargaByNik->get($nik16);
+                                    } elseif ($digits !== '' && isset($wargaByKk) && $wargaByKk instanceof \Illuminate\Support\Collection) {
+                                        $wargaMatch = $wargaByKk->get($digits);
+                                    }
+                                }
+
+                                $nama = $warga?->nama_lengkap ?? $wargaMatch?->nama_lengkap;
+
+                                $nikRaw = null;
+                                if ($warga) {
+                                    $nikRaw = (string) $warga->getRawOriginal('nik');
+                                } elseif ($wargaMatch) {
+                                    $nikRaw = (string) ($wargaMatch->getRawOriginal('nik') ?? $wargaMatch->nik);
+                                } else {
+                                    $nikRaw = $nik16;
+                                }
+
+                                $nikDigits = $nikRaw !== null ? (preg_replace('/\D+/', '', (string) $nikRaw) ?? '') : '';
+                                $nikMasked = '-';
+                                if ($nikDigits !== '' && strlen($nikDigits) === 16) {
+                                    $nikMasked = substr($nikDigits, 0, 4).'*'.substr($nikDigits, 4, 2).'*'.substr($nikDigits, 6, 3).'*'.substr($nikDigits, -4);
+                                }
+                            @endphp
+                            @if($nama)
+                                <strong>{{ $nama }}</strong><br>
+                                <small class="text-muted">{{ $nikMasked }}</small>
                             @else
-                                <small class="text-muted">{{ $iuran->nik }}</small>
+                                <small class="text-muted">{{ $nikMasked !== '-' ? $nikMasked : ($raw !== '' ? $raw : '-') }}</small>
                             @endif
                         </td>
                         <td>{{ $iuran->bulan }} {{ $iuran->tahun }}</td>
