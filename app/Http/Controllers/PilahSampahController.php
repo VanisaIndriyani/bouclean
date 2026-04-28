@@ -60,7 +60,7 @@ class PilahSampahController extends Controller
         $wargaByNik = collect();
         if (! empty($niks)) {
             $wargaByNik = Warga::query()
-                ->select(['nik', 'nama_lengkap', 'no_kk'])
+                ->select(['nik', 'nama_lengkap'])
                 ->whereIn('nik', $niks)
                 ->get()
                 ->keyBy('nik');

@@ -56,14 +56,13 @@
         </div>
 
         <div class="table-responsive overflow-auto">
-            <table class="table table-hover align-middle text-nowrap" style="min-width: 1200px;">
+            <table class="table table-hover align-middle text-nowrap" style="min-width: 1100px;">
                 <thead>
                     <tr>
                         <th width="50">No</th>
                         <th>Bulan</th>
                         <th>Tahun</th>
                         <th>Nama Keluarga</th>
-                        <th>No KK</th>
                         <th>Jenis Sampah</th>
                         <th class="text-center">
                             <div class="fw-semibold">BERAT</div>
@@ -157,19 +156,11 @@
                             } elseif ($displayNikRaw !== null && trim((string) $displayNikRaw) !== '') {
                                 $nikMasked = trim((string) $displayNikRaw);
                             }
-
-                            $noKk = '-';
-                            if ($warga && ($warga->no_kk ?? '') !== '') {
-                                $noKk = $warga->no_kk;
-                            } elseif ($wargaMatch && ($wargaMatch->no_kk ?? '') !== '') {
-                                $noKk = $wargaMatch->no_kk;
-                            }
                         @endphp
                         <td>
                             <div class="fw-semibold">{{ $displayNama ?? '-' }}</div>
                             <div class="text-muted small">{{ $nikMasked }}</div>
                         </td>
-                        <td>{{ $noKk }}</td>
                         <td>{{ $pilah->jenis_sampah ?? '-' }}</td>
                         <td class="text-center">{{ number_format($pilah->berat, 0, ',', '.') }}</td>
                         <td>
@@ -208,7 +199,7 @@
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="11" class="text-center py-4">
+                        <td colspan="10" class="text-center py-4">
                             <div class="text-muted">
                                 <i class="bi bi-inbox fs-1 d-block mb-2"></i>
                                 <strong>Belum ada data pilah sampah</strong>
