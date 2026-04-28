@@ -33,7 +33,7 @@
 
             <div class="row g-4">
                 <div class="col-md-6">
-                    <label class="form-label">Kepala Keluarga (NIK)</label>
+                    <label class="form-label">Pilih kepala keluarga</label>
                     <input type="text" class="form-control @error('kepala_keluarga_nik') is-invalid @enderror" name="kepala_keluarga_nik" value="{{ old('kepala_keluarga_nik') }}" required>
                     @error('kepala_keluarga_nik')
                         <div class="invalid-feedback">{{ $message }}</div>
